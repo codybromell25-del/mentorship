@@ -135,7 +135,7 @@ export async function setEnrollmentStatus(enrollmentId: string, status: "COMPLET
 const cohortSchema = z
   .object({
     name: z.string().trim().min(2, "Name the intake.").max(120),
-    track: z.enum(["STUDIO", "STUDENT"]),
+    track: z.enum(["STUDIO", "INSTRUCTOR"]),
     description: z.string().trim().max(1000).optional(),
     startDate: z.iso.date("Pick a start date."),
     endDate: z.iso.date("Pick an end date."),

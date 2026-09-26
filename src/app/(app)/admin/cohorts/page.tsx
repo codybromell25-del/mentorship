@@ -4,6 +4,7 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { ActionForm } from "@/components/ActionForm";
 import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { createCohort, toggleCohortOpen } from "../actions";
+import { instructorCourse } from "@/content/instructors";
 
 export const metadata = { title: "Cohorts" };
 
@@ -35,7 +36,7 @@ export default async function CohortsPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h2 className="text-xl text-ink">{c.name}</h2>
-                        <Badge tone={c.track === "STUDIO" ? "success" : "accent"}>{c.track === "STUDIO" ? "Studio" : "Student"}</Badge>
+                        <Badge tone={c.track === "STUDIO" ? "success" : "accent"}>{c.track === "STUDIO" ? "Studio" : "Instructor"}</Badge>
                         {c.isOpen ? <Badge tone="success">Open</Badge> : <Badge>Closed</Badge>}
                       </div>
                       <p className="mt-1 text-sm text-muted">
@@ -67,7 +68,7 @@ export default async function CohortsPage() {
               <label className="label" htmlFor="track">Programme</label>
               <select id="track" name="track" className="input">
                 <option value="STUDIO">Studio mentorship (Kelly)</option>
-                <option value="STUDENT">Student pairing</option>
+                <option value="INSTRUCTOR">{instructorCourse.name} (instructors & students)</option>
               </select>
             </div>
             <div>

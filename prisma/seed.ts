@@ -5,7 +5,7 @@
  * Local logins (all use the password in DEMO_PASSWORD below):
  *   admin@example.com    — admin
  *   kelly@example.com    — mentor (studio mentorship)
- *   maya@example.com     — mentor (student pairing)
+ *   maya@example.com     — mentor (Own the Room, instructors)
  *   sam@example.com      — mentee (active, matched with Maya)
  */
 import { PrismaClient } from "@prisma/client";
@@ -56,8 +56,8 @@ async function main() {
       email: "maya@example.com",
       role: "MENTOR",
       passwordHash,
-      headline: "Engineering manager · 12 years building product teams",
-      bio: "I've led teams at two scale-ups and love helping people make the jump from strong individual contributor to leader.",
+      headline: "Senior reformer instructor & educator, balance",
+      bio: "Ten years teaching reformer and mat. I love helping new instructors find their voice and stop over-planning.",
     },
   });
   await prisma.user.create({
@@ -66,14 +66,15 @@ async function main() {
       email: "daniel@example.com",
       role: "MENTOR",
       passwordHash,
-      headline: "Design director · ex-agency, now in-house",
+      headline: "Mat specialist & studio manager",
     },
   });
 
   const current = await prisma.cohort.create({
     data: {
-      name: "Student pairing — Autumn 2026",
-      description: "Our pilot cohort.",
+      name: "Own the Room — Autumn 2026",
+      track: "INSTRUCTOR",
+      description: "Our pilot intake.",
       startDate: new Date(now - 14 * day),
       endDate: new Date(now + 70 * day),
       priceCents: 45000,
@@ -83,8 +84,9 @@ async function main() {
   });
   const next = await prisma.cohort.create({
     data: {
-      name: "Student pairing — Spring 2027",
-      description: "Twelve weeks, six one-to-one sessions, and a goal plan you build with your mentor.",
+      name: "Own the Room — Spring 2027",
+      track: "INSTRUCTOR",
+      description: "Twelve weeks with a mentor from the balance team: one-to-one sessions, feedback on your real classes, and goals you track together.",
       startDate: new Date(now + 120 * day),
       endDate: new Date(now + 204 * day),
       priceCents: 49500,
@@ -94,7 +96,7 @@ async function main() {
 
   const studio = await prisma.cohort.create({
     data: {
-      name: "Studio mentorship — 2027 intake",
+      name: "Studio mentorship — November intake",
       track: "STUDIO",
       description: "A studio deep-dive with Kelly, a tailored plan, and monthly one-to-one sessions for six months.",
       startDate: new Date(now + 45 * day),
@@ -181,9 +183,11 @@ async function main() {
       name: sam.name,
       email: sam.email,
       cohortId: current.id,
-      currentRole: "Senior developer at a logistics company",
-      background: "Six years as a backend developer. Recently started leading a small squad informally.",
-      goals: "Get comfortable leading people, and figure out whether management is the right path for me.",
+      currentRole: "Four reformer classes a week in Dublin",
+      instructorStage: "Qualified less than a year",
+      disciplines: "Reformer",
+      background: "Qualified in the spring. Teaching early mornings and one Saturday class at a busy studio.",
+      goals: "I freeze when clients mention injuries, and my classes are quieter than the other instructors'. I over-plan everything.",
       status: "ACCEPTED",
       reviewedAt: new Date(now - 30 * day),
     },
@@ -203,9 +207,9 @@ async function main() {
   });
   await prisma.goal.createMany({
     data: [
-      { enrollmentId: samEnrollment.id, title: "Run weekly 1:1s with my two juniors", status: "IN_PROGRESS" },
-      { enrollmentId: samEnrollment.id, title: "Lead the Q4 planning session", status: "NOT_STARTED", dueDate: new Date(now + 30 * day) },
-      { enrollmentId: samEnrollment.id, title: "Write down my own career goals", status: "DONE" },
+      { enrollmentId: samEnrollment.id, title: "Teach from a five-block framework instead of a full script", status: "IN_PROGRESS" },
+      { enrollmentId: samEnrollment.id, title: "Build a go-to list of modifications for backs and knees", status: "NOT_STARTED", dueDate: new Date(now + 30 * day) },
+      { enrollmentId: samEnrollment.id, title: "Learn every client's name in my Saturday class", status: "DONE" },
     ],
   });
   await prisma.meeting.createMany({
@@ -215,15 +219,15 @@ async function main() {
         scheduledAt: new Date(now - 10 * day),
         status: "COMPLETED",
         location: "https://meet.google.com/abc-defg-hij",
-        agenda: "Kick-off: expectations and goals",
-        notes: "Great first session. Agreed three goals. Action: draft your 1:1 template before next time.",
+        agenda: "Kick-off: what knocks your confidence, and three goals",
+        notes: "Great first session. Agreed three goals. Action: plan Saturday's class as five blocks with two options each, and notice when you switch.",
         createdById: maya.id,
       },
       {
         enrollmentId: samEnrollment.id,
         scheduledAt: new Date(now + 4 * day),
         location: "https://meet.google.com/abc-defg-hij",
-        agenda: "Review 1:1 template; prep for planning session",
+        agenda: "Review Saturday's class; cueing for the roll-down",
         createdById: maya.id,
       },
     ],
@@ -235,9 +239,11 @@ async function main() {
       name: "Priya Nair",
       email: "priya@example.com",
       cohortId: current.id,
-      currentRole: "Product manager",
-      background: "Moved from consulting into product two years ago.",
-      goals: "Build confidence presenting to leadership and shaping strategy.",
+      currentRole: "Two mat classes a week in Limerick",
+      instructorStage: "Returning after a break",
+      disciplines: "Mat",
+      background: "Taught for four years, then took a year off for maternity leave.",
+      goals: "Getting my confidence back in front of a full room, and handling postnatal clients well.",
       status: "ACCEPTED",
     },
   });
@@ -262,18 +268,22 @@ async function main() {
         name: "Jordan Kelly",
         email: "jordan@example.com",
         cohortId: next.id,
-        currentRole: "UX designer",
-        background: "Four years in agency design, now moving in-house.",
-        goals: "Learn how to influence product decisions, not just execute them.",
-        linkedinUrl: "https://linkedin.com/in/example",
+        currentRole: "Covering classes while I finish my training",
+        instructorStage: "Still training",
+        disciplines: "Mat & Reformer",
+        background: "In the final module of the balance education course.",
+        goals: "I blank on sequences when I'm nervous, and I'm scared of the experienced regulars.",
+        linkedinUrl: "https://instagram.com/example",
       },
       {
         name: "Chris O'Neill",
         email: "chris@example.com",
         cohortId: next.id,
-        currentRole: "Data analyst",
-        background: "Self-taught analyst, three years at a retailer.",
-        goals: "Move into data science and get feedback on a portfolio project.",
+        currentRole: "Ten classes a week across two studios in Cork",
+        instructorStage: "Qualified 3+ years",
+        disciplines: "Reformer",
+        background: "Six years teaching. Classes are fine but I feel like I'm teaching the same class on repeat.",
+        goals: "Find my spark again, and get the confidence to ask for better pay.",
       },
     ],
   });

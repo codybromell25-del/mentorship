@@ -18,7 +18,7 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
     include: {
       mentee: { select: { name: true, email: true } },
       cohort: { select: { name: true } },
-      application: { select: { currentRole: true, goals: true, background: true, linkedinUrl: true, studioName: true, studioLocation: true, studioStage: true } },
+      application: { select: { currentRole: true, goals: true, background: true, linkedinUrl: true, studioName: true, studioLocation: true, studioStage: true, instructorStage: true, disciplines: true } },
       meetings: true,
       goals: { orderBy: { createdAt: "asc" } },
     },
@@ -60,11 +60,19 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
                 </p>
               </>
             )}
-            <p className="text-xs text-muted uppercase">Role</p>
+            {e.application.instructorStage && (
+              <>
+                <p className="text-xs text-muted uppercase">Teaching</p>
+                <p className="mt-1 mb-4 text-ink">
+                  {e.application.instructorStage} · {e.application.disciplines}
+                </p>
+              </>
+            )}
+            <p className="text-xs text-muted uppercase">{e.application.studioName ? "Role" : "Teaches"}</p>
             <p className="mt-1 mb-4 text-ink">{e.application.currentRole}</p>
-            <p className="text-xs text-muted uppercase">Wants from mentorship</p>
+            <p className="text-xs text-muted uppercase">{e.application.studioName ? "Keeping them up at night" : "Knocks their confidence"}</p>
             <p className="mt-1 mb-4 whitespace-pre-line text-ink">{e.application.goals}</p>
-            <p className="text-xs text-muted uppercase">{e.application.studioName ? "About the studio" : "Background"}</p>
+            <p className="text-xs text-muted uppercase">{e.application.studioName ? "About the studio" : "Teaching so far"}</p>
             <p className="mt-1 whitespace-pre-line text-ink">{e.application.background}</p>
             {e.application.linkedinUrl && (
               <a href={e.application.linkedinUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block underline">{e.application.linkedinUrl}</a>

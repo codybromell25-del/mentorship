@@ -1,272 +1,259 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import type { Cohort, Track } from "@prisma/client";
-import { prisma } from "@/lib/db";
-import { site } from "@/lib/site";
-import { formatDate, formatMoney } from "@/lib/format";
-import { software } from "@/lib/software";
+import { appUrl } from "@/lib/site";
+import { getOpenIntakes } from "@/lib/intakes";
+import {
+  hqTeaser,
+  kellyNote,
+  studioFaqs,
+  studioFinalCta,
+  studioHero,
+  studioIncluded,
+  studioPains,
+  studioPillars,
+  studioReframe,
+  studioSteps,
+} from "@/content/studio";
+import { instructorCourse, instructorTeaser } from "@/content/instructors";
+import {
+  ArrowLink,
+  CheckBand,
+  Container,
+  Eyebrow,
+  Faq,
+  FinalCta,
+  HeroTitle,
+  IncludedList,
+  JsonLd,
+  PainSection,
+  SectionIntro,
+  ShiftList,
+  Steps,
+} from "@/components/site/blocks";
+import { IntakeCards, NextIntakeCard } from "@/components/site/IntakeCards";
 
-// Cohort dates and prices come from the database, so render per request.
+// Intake dates, prices and places come from the database.
 export const dynamic = "force-dynamic";
 
-// COPY: placeholder wording — confirm with Kelly before launch.
-const pillars = [
-  {
-    title: "Steady",
-    image: "/images/studio-welcome.jpg",
-    body: "Get the foundations right: cash flow, pricing, timetable and the systems that stop the studio running you.",
-  },
-  {
-    title: "Grow",
-    image: "/images/studio-wide.jpg",
-    body: "Fill classes and keep clients coming back — memberships, marketing, community and when to add capacity.",
-  },
-  {
-    title: "Run",
-    image: "/images/instructor-helping.jpg",
-    body: "Build and lead a team of instructors, protect the client experience, and step back without things slipping.",
-  },
-];
+export const metadata: Metadata = {
+  title: { absolute: "Studio mentorship for Pilates studio owners in Ireland | balance mentorship" },
+  description:
+    "One-to-one mentorship with Kelly O'Neill, founder of balance, Ireland's fastest-growing Pilates studio. Steady your studio, grow it and run it, without it running you.",
+  alternates: { canonical: "/" },
+};
 
-const studioSteps = [
-  { title: "Apply", body: "Tell us about your studio: where it is, how long it's open, and what's keeping you up at night." },
-  { title: "Studio deep-dive", body: "Kelly studies your studio case by case — numbers, timetable, team, pricing and client experience." },
-  { title: "Your plan", body: "You get clear, prioritised advice built for your studio, not a generic template." },
-  { title: "One-to-one sessions", body: "Regular sessions with Kelly to work through the plan, adjust, and tackle what comes up." },
-];
+const APPLY = "/apply?track=studio";
 
-const faqs = [
-  {
-    q: "Is studio mentorship only for balance-trained instructors?",
-    a: "No. It's for anyone who owns, runs or is about to open a Pilates studio, wherever you trained.",
-  },
-  {
-    q: "Do I need to be in Ireland?",
-    a: "No. Sessions are online by default, so you can join from anywhere. In-person visits can be arranged.",
-  },
-  {
-    q: "What happens after I apply?",
-    a: "We review every application personally and reply within a week. If it's a fit, you'll get a link to confirm your place.",
-  },
-  {
-    q: "What is balanceHQ?",
-    a: "The software balance runs on, available to any studio. It's sold separately from mentorship, so you can have either or both.",
-  },
-  {
-    q: "What is student pairing?",
-    a: "Students are matched with an experienced mentor from the balance team for regular one-to-one sessions and shared goals.",
-  },
-];
-
-export default async function LandingPage() {
-  const cohorts = await prisma.cohort.findMany({
-    where: { isOpen: true, startDate: { gte: new Date() } },
-    orderBy: { startDate: "asc" },
-  });
-  const studio = cohorts.filter((c) => c.track === "STUDIO");
-  const students = cohorts.filter((c) => c.track === "STUDENT");
+export default async function HomePage() {
+  const intakes = await getOpenIntakes("STUDIO");
+  const next = intakes[0];
 
   return (
     <>
-      {/* ─── Hero: studio mentorship with Kelly ─────────────────────── */}
-      <section className="relative isolate overflow-hidden">
-        <Image src="/images/interior-2.jpg" alt="The balance studio reformer room" fill priority className="-z-10 object-cover" sizes="100vw" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/90 via-ink/70 to-ink/35" />
-        <div className="mx-auto max-w-6xl px-6 py-28 md:py-40">
-          <p className="mb-5 text-xs tracking-[0.3em] text-accent-soft uppercase">Studio mentorship with Kelly O&apos;Neill</p>
-          <h1 className="max-w-3xl text-5xl leading-[1.08] text-white md:text-6xl">
-            Steady, grow and run your studio — with the founder of balance.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed font-light text-white/85">
-            balance is the fastest-growing Pilates studio in Ireland. Now Kelly works one-to-one with studio owners,
-            studying each studio case by case to help you build yours.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/apply?track=studio" className="btn btn-accent">Apply for studio mentorship</Link>
-            <Link href="#students" className="btn border border-white/40 text-white hover:bg-white/10">Student pairing</Link>
-          </div>
-        </div>
-      </section>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: "Studio mentorship with Kelly O'Neill",
+          serviceType: "Business mentorship for Pilates studio owners",
+          description: studioHero.intro,
+          areaServed: { "@type": "Country", name: "Ireland" },
+          provider: { "@type": "Organization", name: "balance studios", url: appUrl() },
+          offers: intakes.map((c) => ({
+            "@type": "Offer",
+            name: c.name,
+            price: (c.priceCents / 100).toFixed(2),
+            priceCurrency: c.currency.toUpperCase(),
+            availability: c.placesLeft > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+            url: `${appUrl()}${APPLY}&cohort=${c.id}`,
+          })),
+        }}
+      />
 
-      {/* ─── About Kelly ────────────────────────────────────────────── */}
-      <section id="studio" className="scroll-mt-16 bg-surface">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-[5fr_7fr] md:py-28">
-          <div className="relative aspect-[5/7] overflow-hidden rounded-2xl">
-            <Image src="/images/tutor-kelly.jpg" alt="Kelly O'Neill in the balance studio" fill className="object-cover" sizes="(min-width: 768px) 40vw, 100vw" />
-          </div>
-          <div>
-            <span className="inline-block rounded-full bg-accent/10 px-4 py-1 text-xs tracking-[0.3em] text-accent uppercase">Your mentor</span>
-            <h2 className="mt-6 text-4xl leading-tight text-ink md:text-5xl">Kelly O&apos;Neill</h2>
-            <p className="mt-3 text-xs tracking-[0.3em] text-muted uppercase">Founder · balance studios</p>
-            <div className="mt-8 space-y-4 leading-relaxed text-muted">
-              {/* COPY: confirm Kelly's story and numbers before launch. */}
-              <p>
-                Kelly built balance into the fastest-growing Pilates studio in Ireland. She has done the hard parts
-                herself: finding the space, filling the timetable, hiring and training instructors, and keeping clients
-                coming back.
-              </p>
-              <p>
-                Studio mentorship puts that experience to work on your business. Kelly looks at your studio case by case
-                — no templates — and gives honest, practical advice on what to fix first, where to grow, and how to run
-                it without burning out.
+      {/* ─── Hero ─────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        <Container className="grid gap-14 pt-12 pb-24 lg:grid-cols-12 lg:gap-12 lg:pt-20 lg:pb-32">
+          <div className="lg:col-span-7 lg:pt-10">
+            <Eyebrow>{studioHero.eyebrow}</Eyebrow>
+            <div className="mt-8">
+              <HeroTitle lineOne={studioHero.lineOne} lineTwo={studioHero.lineTwo} />
+            </div>
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted">{studioHero.intro}</p>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+              <Link href={APPLY} className="btn btn-accent">Apply for studio mentorship</Link>
+              <ArrowLink href="/studio-health-check">Take the free 2-minute studio health check</ArrowLink>
+            </div>
+            <div className="mt-14 flex items-center gap-4 border-t border-border pt-7">
+              <Image src="/images/tutor-kelly.jpg" alt="" width={112} height={112} className="h-14 w-14 rounded-full object-cover object-top" />
+              <p className="text-sm leading-snug text-muted">
+                <span className="font-medium text-ink">Kelly O&apos;Neill</span>
+                <br />
+                Founder of balance, Ireland&apos;s fastest-growing Pilates studio
               </p>
             </div>
-            <Link href="/apply?track=studio" className="btn btn-primary mt-10">Apply to work with Kelly</Link>
           </div>
-        </div>
+
+          <div className="relative lg:col-span-5">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] lg:aspect-auto lg:h-full lg:min-h-[600px]">
+              <Image
+                src="/images/studio-reformers-row.jpg"
+                alt="A row of reformers in the balance studio"
+                fill
+                priority
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 100vw"
+              />
+            </div>
+            {next && (
+              <div className="absolute right-4 -bottom-8 left-4 sm:right-auto sm:left-6 sm:w-72 lg:-left-10">
+                <NextIntakeCard intake={next} applyHref={APPLY} />
+              </div>
+            )}
+          </div>
+        </Container>
+      </section>
+
+      {/* ─── The pain nobody posts about ───────────────────────────── */}
+      <PainSection {...studioPains}>
+        <Link href="#kelly" className="btn btn-gold">That&apos;s what Kelly is for</Link>
+      </PainSection>
+
+      {/* ─── Reframe + Kelly ───────────────────────────────────────── */}
+      <section id="kelly" className="scroll-mt-20">
+        <Container className="grid gap-14 py-24 md:py-32 lg:grid-cols-12 lg:gap-16">
+          <div className="reveal lg:col-span-5">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] lg:sticky lg:top-28">
+              <Image src="/images/tutor-kelly.jpg" alt="Kelly O'Neill in the balance studio" fill className="object-cover" sizes="(min-width: 1024px) 40vw, 100vw" />
+            </div>
+          </div>
+          <div className="lg:col-span-7 lg:pt-6">
+            <SectionIntro eyebrow={studioReframe.eyebrow} title={studioReframe.title} />
+            <div className="reveal mt-8 space-y-5 text-lg leading-relaxed text-muted">
+              {studioReframe.body.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+
+            <figure className="reveal mt-14 rounded-[2rem] border border-border bg-surface p-8 md:p-12">
+              <p className="text-xs tracking-[0.3em] text-accent uppercase">A note from Kelly</p>
+              <blockquote className="mt-6 space-y-5 font-heading text-lg leading-relaxed text-ink italic md:text-xl">
+                {kellyNote.paragraphs.map((p) => (
+                  <p key={p}>{p}</p>
+                ))}
+              </blockquote>
+              <figcaption className="mt-8 border-t border-border pt-6">
+                <p className="font-heading text-2xl text-ink italic">{kellyNote.name}</p>
+                <p className="mt-1 text-xs tracking-[0.2em] text-muted uppercase">{kellyNote.role}</p>
+              </figcaption>
+            </figure>
+          </div>
+        </Container>
       </section>
 
       {/* ─── Steady / Grow / Run ───────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-        <div className="mb-14 max-w-2xl">
-          <p className="eyebrow mb-4">What we work on</p>
-          <h2 className="text-4xl leading-tight text-ink">Advice for every stage of your studio.</h2>
-        </div>
-        <div className="grid gap-8 md:grid-cols-3">
-          {pillars.map((p) => (
-            <article key={p.title} className="overflow-hidden rounded-2xl border border-border bg-surface">
-              <div className="relative aspect-[4/3]">
-                <Image src={p.image} alt="" fill className="object-cover" sizes="(min-width: 768px) 33vw, 100vw" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-2xl text-ink">{p.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── How studio mentorship works + studio cohorts ───────────── */}
       <section className="border-y border-border bg-surface">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <p className="eyebrow mb-4">How it works</p>
-          <h2 className="mb-14 text-4xl text-ink">Case by case, studio by studio.</h2>
-          <ol className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            {studioSteps.map((s, i) => (
-              <li key={s.title}>
-                <p className="font-heading text-4xl text-gold italic">{String(i + 1).padStart(2, "0")}</p>
-                <h3 className="mt-3 text-xl text-ink">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-16">
-            <CohortCards cohorts={studio} track="STUDIO" />
-          </div>
-        </div>
-      </section>
-
-      {/* ─── balanceHQ software (separate product) ─────────────────── */}
-      <section id="software" className="scroll-mt-16 bg-ink text-white">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:items-end">
-            <div>
-              <span className="inline-block rounded-full bg-gold/20 px-4 py-1 text-xs tracking-[0.3em] text-gold uppercase">Also from balance · sold separately</span>
-              <h2 className="mt-6 text-4xl leading-tight text-white md:text-5xl">balanceHQ studio software</h2>
-            </div>
-            <p className="leading-relaxed text-white/75">
-              The tools that run balance, built by us for studios like yours. Available on their own, with or without
-              mentorship.
-            </p>
-          </div>
-          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
-            {software.map((t) => (
-              <article key={t.name} className="bg-ink p-7">
-                <p className={`mb-4 text-[11px] tracking-[0.2em] uppercase ${t.status === "In use at balance" ? "text-gold" : "text-white/50"}`}>{t.status}</p>
-                <h3 className="text-2xl text-white">{t.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">{t.body}</p>
+        <Container className="py-24 md:py-32">
+          <SectionIntro
+            eyebrow="What changes"
+            title="Three things we fix, in the right order."
+            intro="Every studio is different, so Kelly starts with yours. But almost every plan comes back to the same three things."
+          />
+          <div className="mt-16 grid gap-6 lg:grid-cols-3">
+            {studioPillars.map((p) => (
+              <article key={p.title} className="reveal flex flex-col overflow-hidden rounded-[2rem] border border-border bg-background">
+                <div className="relative aspect-[16/11]">
+                  <Image src={p.image} alt="" fill className="object-cover" sizes="(min-width: 1024px) 33vw, 100vw" />
+                </div>
+                <div className="flex flex-1 flex-col p-7 md:p-8">
+                  <h3 className="text-3xl text-ink">{p.title}</h3>
+                  <p className="mt-3 leading-relaxed text-muted">{p.lead}</p>
+                  <div className="mt-7 border-t border-border pt-7">
+                    <ShiftList shifts={p.shifts} />
+                  </div>
+                </div>
               </article>
             ))}
           </div>
-          <div className="mt-12 flex flex-wrap items-center gap-4">
-            <Link href="/balancehq" className="btn bg-gold text-ink hover:bg-gold-soft">Enquire about balanceHQ</Link>
-            <a href={`mailto:${site.contactEmail}?subject=balanceHQ`} className="text-sm text-white/70 underline hover:text-white">or email us</a>
-          </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ─── Image strip ───────────────────────────────────────────── */}
-      <section className="grid grid-cols-2 md:grid-cols-4" aria-hidden>
-        {["/images/studio-bray-hero.jpg", "/images/pillar-3-attic.jpg", "/images/why-balance-hallway.jpg", "/images/studio-mirror.jpg"].map((src) => (
-          <div key={src} className="relative aspect-square">
-            <Image src={src} alt="" fill className="object-cover" sizes="(min-width: 768px) 25vw, 50vw" />
+      {/* ─── How it works + intakes ────────────────────────────────── */}
+      <section id="how-it-works" className="scroll-mt-20">
+        <Container className="py-24 md:py-32">
+          <SectionIntro eyebrow="How it works" title="Case by case, studio by studio." />
+          <div className="mt-16">
+            <Steps steps={studioSteps} />
           </div>
-        ))}
-      </section>
-
-      {/* ─── Student pairing ───────────────────────────────────────── */}
-      <section id="students" className="scroll-mt-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
-          <div>
-            <span className="inline-block rounded-full bg-gold/15 px-4 py-1 text-xs tracking-[0.3em] text-gold-ink uppercase">Student pairing</span>
-            <h2 className="mt-6 text-4xl leading-tight text-ink">Learn alongside someone who&apos;s been there.</h2>
-            {/* COPY: confirm who student pairing is for and what's included. */}
-            <p className="mt-6 leading-relaxed text-muted">
-              We pair students with an experienced mentor from the balance team. You&apos;ll meet one-to-one, set goals
-              together, and get honest feedback as you build your teaching and your confidence.
-            </p>
-            <ul className="mt-6 space-y-2 text-sm text-ink">
-              <li>— Matched with a mentor who fits your goals</li>
-              <li>— Regular one-to-one sessions, with notes after each</li>
-              <li>— Shared goals you track in your dashboard</li>
-            </ul>
-            <div className="mt-10">
-              <CohortCards cohorts={students} track="STUDENT" compact />
+          <div className="mt-24 grid gap-14 lg:grid-cols-12">
+            <div className="reveal lg:col-span-5">
+              <IncludedList items={studioIncluded} />
+            </div>
+            <div id="intakes" className="reveal scroll-mt-24 lg:col-span-7">
+              <h3 className="mb-6 text-2xl text-ink">Upcoming intakes</h3>
+              <IntakeCards intakes={intakes} applyHref={APPLY} />
             </div>
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
-            <Image src="/images/instructor-chat.jpg" alt="A balance instructor guiding a student on the reformer" fill className="object-cover" sizes="(min-width: 768px) 50vw, 100vw" />
-          </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ─── FAQ ───────────────────────────────────────────────────── */}
-      <section className="border-t border-border bg-surface">
-        <div className="mx-auto max-w-3xl px-6 py-20">
-          <h2 className="mb-8 text-3xl text-ink">Questions</h2>
-          <div className="divide-y divide-border">
-            {faqs.map((f) => (
-              <details key={f.q} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
-                  {f.q}
-                  <span className="text-muted transition-transform group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{f.a}</p>
-              </details>
+      <CheckBand
+        eyebrow="Not ready to apply?"
+        title="How healthy is your studio, really?"
+        body="Eight honest questions, two minutes, and a clear picture of where to focus first. Your answers aren't stored."
+        href="/studio-health-check"
+        label="Take the health check"
+      />
+
+      {/* ─── balanceHQ (sold separately) ───────────────────────────── */}
+      <section className="mt-24 bg-ink text-white">
+        <Container className="grid gap-14 py-24 md:py-28 lg:grid-cols-12 lg:items-center">
+          <div className="reveal lg:col-span-6">
+            <Eyebrow tone="gold">{hqTeaser.eyebrow}</Eyebrow>
+            <h2 className="mt-5 text-4xl leading-tight text-white md:text-5xl">{hqTeaser.title}</h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/75">{hqTeaser.body}</p>
+            <div className="mt-10">
+              <ArrowLink href="/balancehq" light>Explore balanceHQ</ArrowLink>
+            </div>
+          </div>
+          <ul className="reveal space-y-4 lg:col-span-6">
+            {hqTeaser.questions.map((q, i) => (
+              <li key={q} className="flex items-baseline gap-5 rounded-2xl border border-white/10 px-6 py-5">
+                <span className="font-heading text-sm text-gold italic">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-heading text-xl text-white/90 italic md:text-2xl">{q}</span>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </Container>
       </section>
-    </>
-  );
-}
 
-function CohortCards({ cohorts, track, compact = false }: { cohorts: Cohort[]; track: Track; compact?: boolean }) {
-  const param = track === "STUDIO" ? "studio" : "student";
-  if (cohorts.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-border px-6 py-6 text-sm text-muted">
-        No intakes are open right now. Email{" "}
-        <a className="text-ink underline" href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a> to hear when the next one opens.
-      </div>
-    );
-  }
-  return (
-    <div className={`grid gap-5 ${compact ? "" : "md:grid-cols-3"}`}>
-      {cohorts.map((c) => (
-        <div key={c.id} className="flex flex-col rounded-2xl border border-border bg-background p-6">
-          <h3 className="text-xl text-ink">{c.name}</h3>
-          <p className="mt-1 text-sm text-muted">
-            Starts {formatDate(c.startDate)} · {c.capacity} places
-          </p>
-          {c.description && !compact && <p className="mt-4 text-sm leading-relaxed text-muted">{c.description}</p>}
-          <div className="mt-auto flex items-end justify-between gap-4 pt-6">
-            <p className="font-heading text-3xl text-ink">{formatMoney(c.priceCents, c.currency)}</p>
-            <Link href={`/apply?track=${param}&cohort=${c.id}`} className="btn btn-primary btn-sm">Apply</Link>
+      {/* ─── For instructors ───────────────────────────────────────── */}
+      <section>
+        <Container className="grid gap-14 py-24 md:py-32 lg:grid-cols-12 lg:items-center">
+          <div className="reveal relative aspect-[4/5] overflow-hidden rounded-[2rem] lg:col-span-5">
+            <Image src="/images/instructor-chat.jpg" alt="A balance instructor teaching on the reformer" fill className="object-cover" sizes="(min-width: 1024px) 40vw, 100vw" />
           </div>
-        </div>
-      ))}
-    </div>
+          <div className="reveal lg:col-span-6 lg:col-start-7">
+            <Eyebrow>{instructorTeaser.eyebrow}</Eyebrow>
+            <h2 className="mt-5 text-4xl leading-tight text-ink md:text-5xl">{instructorTeaser.title}</h2>
+            <p className="mt-6 text-lg leading-relaxed text-muted">{instructorTeaser.body}</p>
+            <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+              <Link href="/instructors" className="btn btn-primary">Explore {instructorCourse.name}</Link>
+              <ArrowLink href="/teaching-confidence-check">Take the teaching confidence check</ArrowLink>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <Faq items={studioFaqs} />
+
+      <FinalCta
+        title={studioFinalCta.title}
+        body={studioFinalCta.body}
+        image="/images/studio-bray-hero.jpg"
+        primary={{ href: APPLY, label: "Apply for studio mentorship" }}
+        secondary={{ href: "/studio-health-check", label: "Take the free health check" }}
+      />
+    </>
   );
 }

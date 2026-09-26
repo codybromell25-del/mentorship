@@ -23,3 +23,7 @@ mentor books sessions and writes notes; mentee and mentor share goals.
 - Video calls: `src/lib/google.ts` (Calendar/Meet via REST, refresh tokens
   AES-GCM encrypted with AUTH_SECRET). Mentor schedule `/mentor/schedule`,
   settings `/mentor/settings`; mentee call centre `/dashboard/sessions`.
+- Marketing site: pages in `src/app/(public)/`, built from blocks in
+  `src/components/site/` with copy from `src/content/`. Tracks are STUDIO
+  and INSTRUCTOR (Own the Room). Places left on intake cards are real
+  (`src/lib/intakes.ts`); never fake scarcity, testimonials or stats.

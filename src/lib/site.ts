@@ -4,9 +4,9 @@
  */
 export const site = {
   name: "balance mentorship",
-  tagline: "Studio mentorship with Kelly O'Neill, founder of balance studios",
+  tagline: "Ireland's home for Pilates studio owners and instructors",
   description:
-    "One-to-one mentorship for Pilates studio owners from the founder of balance, Ireland's fastest-growing Pilates studio — plus mentor pairing for students.",
+    "One-to-one mentorship for Pilates studio owners with Kelly O'Neill, founder of balance, Ireland's fastest-growing Pilates studio. Plus Own the Room, mentorship for instructors, and balanceHQ studio software.",
   contactEmail: "team@balancestudios.ie",
   mentorName: "Kelly O'Neill",
   // All meeting times are entered and shown in this zone.

@@ -55,7 +55,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                 <div>
                   <p className="flex items-center gap-2 font-medium text-ink">
                     {a.name}
-                    <Badge tone={a.cohort.track === "STUDIO" ? "success" : "accent"}>{a.cohort.track === "STUDIO" ? "Studio" : "Student"}</Badge>
+                    <Badge tone={a.cohort.track === "STUDIO" ? "success" : "accent"}>{a.cohort.track === "STUDIO" ? "Studio" : "Instructor"}</Badge>
                     {a.wantsSoftware && <Badge tone="warning">balanceHQ lead</Badge>}
                   </p>
                   <p className="text-sm text-muted">
@@ -74,9 +74,10 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                   {a.studioName && (
                     <Field label="Studio" value={`${a.studioName} · ${a.studioLocation} · ${a.studioStage}`} />
                   )}
-                  <Field label="Role" value={a.currentRole} />
-                  <Field label={a.studioName ? "About the studio" : "Background"} value={a.background} />
-                  <Field label="Wants help with" value={a.goals} />
+                  {a.instructorStage && <Field label="Teaching" value={`${a.instructorStage} · ${a.disciplines ?? ""}`} />}
+                  <Field label={a.studioName ? "Role" : "Teaches"} value={a.currentRole} />
+                  <Field label={a.studioName ? "About the studio" : "Teaching so far"} value={a.background} />
+                  <Field label={a.studioName ? "Keeping them up at night" : "Knocks their confidence"} value={a.goals} />
                   {a.linkedinUrl && (
                     <a href={a.linkedinUrl} target="_blank" rel="noreferrer" className="inline-block underline">
                       {a.linkedinUrl}

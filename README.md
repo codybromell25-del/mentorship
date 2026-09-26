@@ -1,10 +1,21 @@
 # balance mentorship
 
-Two paid 1:1 programmes from balance studios, each with its own intakes:
+Ireland's home for Pilates studio owners and instructors. Two paid 1:1
+programmes from balance studios, each with its own intakes:
 
-- **Studio mentorship** (the headline offer): Kelly O'Neill works one-to-one
-  with Pilates studio owners, case by case, to steady, grow and run their studio.
-- **Student pairing**: students are matched with a mentor from the balance team.
+- **Studio mentorship** (the headline offer, homepage `/`): Kelly O'Neill works
+  one-to-one with Pilates studio owners, case by case, to steady, grow and run
+  their studio.
+- **Own the Room** (`/instructors`): a mentorship course for instructors who
+  want to teach with confidence, paired with a mentor from the balance team.
+  Students still training join here too (this replaced "student pairing").
+
+Free lead-generating self-checks: `/studio-health-check` (owners) and
+`/teaching-confidence-check` (instructors). Answers stay in the browser.
+
+**All website copy lives in `src/content/`** (studio, instructors, balancehq,
+checks), separate from layout, so it can be reviewed and edited in one place.
+Lines marked `COPY:` are drafts to confirm with Kelly.
 
 The landing page also sells **balanceHQ**, balance's studio software, which is
 **sold separately** from mentorship. Studios enquire at `/balancehq`; enquiries
@@ -37,7 +48,7 @@ Locally, with no Stripe or Resend keys, emails print to the terminal running
 
 ## How the programme works
 
-1. Someone applies at `/apply?track=studio` or `/apply?track=student` for an open intake
+1. Someone applies at `/apply?track=studio` or `/apply?track=instructor` for an open intake
    (intakes are created per programme at `/admin/cohorts`).
 2. An admin accepts at `/admin/applications`, which emails them a payment link.
 3. They pay via Stripe; the webhook creates their account and emails a set-password link.

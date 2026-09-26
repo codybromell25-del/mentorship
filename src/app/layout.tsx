@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Raleway } from "next/font/google";
-import { site } from "@/lib/site";
+import { appUrl, site } from "@/lib/site";
 import "./globals.css";
 
 // Same fonts as balance education, self-hosted via next/font.
@@ -21,8 +21,16 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl()),
   title: { default: `${site.name} | ${site.tagline}`, template: `%s | ${site.name}` },
   description: site.description,
+  openGraph: {
+    type: "website",
+    locale: "en_IE",
+    siteName: site.name,
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "The reformer room at balance studios" }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

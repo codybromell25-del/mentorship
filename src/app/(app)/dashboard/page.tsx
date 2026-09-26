@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { NextSessionCard } from "@/components/calls/NextSessionCard";
 import { GoalList } from "@/components/mentorship/GoalList";
+import { instructorCourse, instructorModules } from "@/content/instructors";
 
 export const metadata = { title: "Dashboard" };
 
@@ -64,6 +65,25 @@ export default async function MenteeDashboard() {
                 <p className="text-sm text-muted">We&apos;re matching you with a mentor now. You&apos;ll get an email as soon as it&apos;s done.</p>
               )}
             </section>
+
+            {enrollment.cohort.track === "INSTRUCTOR" && (
+              <section className="card">
+                <p className="eyebrow mb-3">{instructorCourse.name}</p>
+                <h2 className="text-xl text-ink">What we&apos;ll work on</h2>
+                <p className="mt-1 text-sm text-muted">Your mentor spends the most time where you need it.</p>
+                <ol className="mt-5 space-y-4">
+                  {instructorModules.map((m, i) => (
+                    <li key={m.title} className="grid grid-cols-[2rem_1fr] gap-2">
+                      <span className="font-heading text-sm text-gold italic">{String(i + 1).padStart(2, "0")}</span>
+                      <div>
+                        <p className="text-sm font-medium text-ink">{m.title}</p>
+                        <p className="text-xs leading-relaxed text-muted">{m.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             {lastNotes && (
               <section className="card">

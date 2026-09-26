@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { appUrl } from "@/lib/site";
 import { notifyAdmin, sendEmailAsync } from "@/lib/email";
 import { adminNewApplicationEmail, applicationReceivedEmail } from "@/lib/emails";
+import { DISCIPLINES, INSTRUCTOR_STAGES } from "@/content/instructors";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(120),
@@ -15,6 +16,11 @@ const schema = z.object({
   background: z.string().trim().min(20, "Tell us a little more about your background (20+ characters)").max(4000),
   goals: z.string().trim().min(20, "Tell us a little more about your goals (20+ characters)").max(4000),
   linkedinUrl: z.union([z.literal(""), z.url({ protocol: /^https?$/, error: "Links must be a full https:// URL" })]).optional(),
+});
+
+const instructorSchema = z.object({
+  instructorStage: z.enum(INSTRUCTOR_STAGES as [string, ...string[]], { error: "Please tell us where you are in your teaching" }),
+  disciplines: z.enum(DISCIPLINES as [string, ...string[]], { error: "Please tell us what you teach" }),
 });
 
 const studioSchema = z.object({
@@ -27,7 +33,7 @@ export type ApplyState = { error?: string; values?: Record<string, string> } | n
 
 export async function submitApplication(_prev: ApplyState, formData: FormData): Promise<ApplyState> {
   const raw = Object.fromEntries(
-    ["name", "email", "cohortId", "currentRole", "background", "goals", "linkedinUrl", "studioName", "studioLocation", "studioStage", "wantsSoftware"].map((k) => [k, String(formData.get(k) ?? "")]),
+    ["name", "email", "cohortId", "currentRole", "background", "goals", "linkedinUrl", "studioName", "studioLocation", "studioStage", "wantsSoftware", "instructorStage", "disciplines"].map((k) => [k, String(formData.get(k) ?? "")]),
   );
 
   // Honeypot: real users never see or fill this field.
@@ -40,12 +46,17 @@ export async function submitApplication(_prev: ApplyState, formData: FormData): 
   const cohort = await prisma.cohort.findFirst({ where: { id: data.cohortId, isOpen: true } });
   if (!cohort) return { error: "That intake is no longer taking applications.", values: raw };
 
-  // Studio fields are required for the studio track and ignored otherwise.
+  // Track-specific fields: required for their own track, ignored otherwise.
   let studio: z.infer<typeof studioSchema> | null = null;
+  let instructor: z.infer<typeof instructorSchema> | null = null;
   if (cohort.track === "STUDIO") {
     const s = studioSchema.safeParse(raw);
     if (!s.success) return { error: s.error.issues[0].message, values: raw };
     studio = s.data;
+  } else {
+    const i = instructorSchema.safeParse(raw);
+    if (!i.success) return { error: i.error.issues[0].message, values: raw };
+    instructor = i.data;
   }
 
   const duplicate = await prisma.application.findFirst({
@@ -54,7 +65,7 @@ export async function submitApplication(_prev: ApplyState, formData: FormData): 
   if (duplicate) return { error: "You've already applied for this intake — we'll be in touch.", values: raw };
 
   await prisma.application.create({
-    data: { ...data, ...studio, wantsSoftware: studio ? formData.get("wantsSoftware") === "on" : false, linkedinUrl: data.linkedinUrl || null, cohortId: cohort.id },
+    data: { ...data, ...studio, ...instructor, wantsSoftware: studio ? formData.get("wantsSoftware") === "on" : false, linkedinUrl: data.linkedinUrl || null, cohortId: cohort.id },
   });
 
   sendEmailAsync({ to: data.email, ...applicationReceivedEmail({ name: data.name, cohortName: cohort.name }) });
