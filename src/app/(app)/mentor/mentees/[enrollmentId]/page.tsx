@@ -18,7 +18,7 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
     include: {
       mentee: { select: { name: true, email: true } },
       cohort: { select: { name: true } },
-      application: { select: { currentRole: true, goals: true, background: true, linkedinUrl: true } },
+      application: { select: { currentRole: true, goals: true, background: true, linkedinUrl: true, studioName: true, studioLocation: true, studioStage: true } },
       meetings: true,
       goals: { orderBy: { createdAt: "asc" } },
     },
@@ -46,14 +46,24 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
           {active && <ScheduleMeetingForm enrollmentId={e.id} />}
           <section className="card text-sm">
             <h2 className="mb-4 text-xl text-ink">From their application</h2>
-            <p className="text-xs text-muted uppercase">Current role</p>
+            {e.application.studioName && (
+              <>
+                <p className="text-xs text-muted uppercase">Studio</p>
+                <p className="mt-1 mb-4 text-ink">
+                  {e.application.studioName} · {e.application.studioLocation}
+                  <br />
+                  <span className="text-muted">{e.application.studioStage}</span>
+                </p>
+              </>
+            )}
+            <p className="text-xs text-muted uppercase">Role</p>
             <p className="mt-1 mb-4 text-ink">{e.application.currentRole}</p>
             <p className="text-xs text-muted uppercase">Wants from mentorship</p>
             <p className="mt-1 mb-4 whitespace-pre-line text-ink">{e.application.goals}</p>
-            <p className="text-xs text-muted uppercase">Background</p>
+            <p className="text-xs text-muted uppercase">{e.application.studioName ? "About the studio" : "Background"}</p>
             <p className="mt-1 whitespace-pre-line text-ink">{e.application.background}</p>
             {e.application.linkedinUrl && (
-              <a href={e.application.linkedinUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block underline">LinkedIn profile</a>
+              <a href={e.application.linkedinUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block underline">{e.application.linkedinUrl}</a>
             )}
           </section>
         </div>

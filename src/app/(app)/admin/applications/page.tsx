@@ -3,7 +3,7 @@ import type { ApplicationStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { ActionForm } from "@/components/ActionForm";
-import { EmptyState, PageHeader, StatusBadge } from "@/components/ui";
+import { Badge, EmptyState, PageHeader, StatusBadge } from "@/components/ui";
 import { acceptApplication, decideApplication, resendPaymentLink, saveApplicationNotes } from "../actions";
 
 export const metadata = { title: "Applications" };
@@ -23,7 +23,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
     prisma.application.findMany({
       where: { status },
       orderBy: { createdAt: status === "PENDING" ? "asc" : "desc" },
-      include: { cohort: { select: { name: true } }, enrollment: { select: { id: true, status: true } } },
+      include: { cohort: { select: { name: true, track: true } }, enrollment: { select: { id: true, status: true } } },
     }),
     prisma.application.groupBy({ by: ["status"], _count: true }),
   ]);
@@ -53,9 +53,12 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
             <details key={a.id} className="card group" open={apps.length === 1}>
               <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-medium text-ink">{a.name}</p>
+                  <p className="flex items-center gap-2 font-medium text-ink">
+                    {a.name}
+                    <Badge tone={a.cohort.track === "STUDIO" ? "success" : "accent"}>{a.cohort.track === "STUDIO" ? "Studio" : "Student"}</Badge>
+                  </p>
                   <p className="text-sm text-muted">
-                    {a.email} · {a.currentRole}
+                    {a.email} · {a.studioName ? `${a.studioName}, ${a.studioLocation}` : a.currentRole}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted">
@@ -67,11 +70,15 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
 
               <div className="mt-6 grid gap-6 border-t border-border pt-6 lg:grid-cols-[1fr_300px]">
                 <div className="space-y-4 text-sm">
-                  <Field label="Background" value={a.background} />
-                  <Field label="Wants from mentorship" value={a.goals} />
+                  {a.studioName && (
+                    <Field label="Studio" value={`${a.studioName} · ${a.studioLocation} · ${a.studioStage}`} />
+                  )}
+                  <Field label="Role" value={a.currentRole} />
+                  <Field label={a.studioName ? "About the studio" : "Background"} value={a.background} />
+                  <Field label="Wants help with" value={a.goals} />
                   {a.linkedinUrl && (
                     <a href={a.linkedinUrl} target="_blank" rel="noreferrer" className="inline-block underline">
-                      LinkedIn profile
+                      {a.linkedinUrl}
                     </a>
                   )}
                   <ActionForm action={saveApplicationNotes.bind(null, a.id)} submitLabel="Save notes" submitClassName="btn btn-ghost btn-sm" className="space-y-2 pt-2">

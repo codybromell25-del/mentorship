@@ -1,7 +1,13 @@
-# Mentorship
+# balance mentorship
 
-A paid, cohort-based 1:1 mentorship programme: public site and applications,
-admin review, Stripe payment, and dashboards for mentees, mentors and admins.
+Two paid 1:1 programmes from balance studios, each with its own intakes:
+
+- **Studio mentorship** (the headline offer): Kelly O'Neill works one-to-one
+  with Pilates studio owners, case by case, to steady, grow and run their studio.
+- **Student pairing**: students are matched with a mentor from the balance team.
+
+Public site and applications, admin review, Stripe payment, and dashboards for
+mentees, mentors and admins. Colours, fonts and imagery match balance education.
 
 Next.js 16 · Tailwind 4 · Prisma + Postgres · NextAuth (credentials) · Stripe · Resend · Vercel
 
@@ -15,17 +21,18 @@ npm run db:push && npm run db:seed && npm run dev   # terminal 2
 ```
 
 Open http://localhost:3000. The seed creates demo logins (see `prisma/seed.ts`):
-`admin@example.com`, `maya@example.com` (mentor), `sam@example.com` (mentee).
+`admin@example.com`, `kelly@example.com` and `maya@example.com` (mentors), `sam@example.com` (mentee).
 
 Locally, with no Stripe or Resend keys, emails print to the terminal running
 `npm run dev`, and payment links show a **Simulate payment** button.
 
 ## How the programme works
 
-1. Someone applies at `/apply` for an open cohort.
+1. Someone applies at `/apply?track=studio` or `/apply?track=student` for an open intake
+   (intakes are created per programme at `/admin/cohorts`).
 2. An admin accepts at `/admin/applications`, which emails them a payment link.
 3. They pay via Stripe; the webhook creates their account and emails a set-password link.
-4. The admin assigns a mentor at `/admin/enrollments`.
+4. The admin assigns a mentor at `/admin/enrollments` (Kelly for studio owners).
 5. The mentor books sessions, records notes, and tracks goals with the mentee.
 
 ## Going live
@@ -40,3 +47,7 @@ Locally, with no Stripe or Resend keys, emails print to the terminal running
 5. Verify your sending domain in Resend and set `RESEND_API_KEY` and `EMAIL_FROM`.
 
 Rename the programme and set the contact email and timezone in `src/lib/site.ts`.
+
+Landing-page wording marked `COPY:` in `src/app/(public)/page.tsx` is placeholder
+text to confirm with Kelly. Photos in `public/images` are web-sized copies of
+the balance education site's images.

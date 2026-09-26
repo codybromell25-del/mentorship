@@ -3,11 +3,12 @@
  * page, email and Stripe line item picks it up.
  */
 export const site = {
-  name: "Mentorship",
-  tagline: "A 12-week, one-to-one mentorship programme",
+  name: "balance mentorship",
+  tagline: "Studio mentorship with Kelly O'Neill, founder of balance studios",
   description:
-    "Get paired with an experienced mentor for twelve weeks of focused one-to-one sessions, clear goals, and honest feedback.",
-  contactEmail: "hello@example.com",
+    "One-to-one mentorship for Pilates studio owners from the founder of balance, Ireland's fastest-growing Pilates studio — plus mentor pairing for students.",
+  contactEmail: "team@balancestudios.ie",
+  mentorName: "Kelly O'Neill",
   // All meeting times are entered and shown in this zone.
   timeZone: "Europe/Dublin",
 };

@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
-import { site } from "@/lib/site";
 
 export type NavItem = { href: string; label: string };
 
@@ -26,8 +26,9 @@ export function AppShell({
       <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
           <div className="flex items-center gap-8">
-            <Link href="/" className="font-heading text-xl text-ink">
-              {site.name}
+            <Link href="/" className="flex items-center gap-2.5 text-xl font-light tracking-wide text-ink">
+              <Image src="/images/balance-logo.jpg" alt="" width={28} height={28} className="rounded-full" />
+              balance
               <span className="ml-2 align-middle font-body text-xs tracking-wide text-muted uppercase">{area}</span>
             </Link>
             <nav className="hidden items-center gap-5 md:flex">

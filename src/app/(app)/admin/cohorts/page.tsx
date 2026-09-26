@@ -22,11 +22,11 @@ export default async function CohortsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Admin" title="Cohorts" />
+      <PageHeader eyebrow="Admin" title="Intakes" />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div>
           {cohorts.length === 0 ? (
-            <EmptyState title="No cohorts yet">Create your first cohort to start taking applications.</EmptyState>
+            <EmptyState title="No intakes yet">Create your first intake to start taking applications.</EmptyState>
           ) : (
             <div className="space-y-4">
               {cohorts.map((c) => (
@@ -35,6 +35,7 @@ export default async function CohortsPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <h2 className="text-xl text-ink">{c.name}</h2>
+                        <Badge tone={c.track === "STUDIO" ? "success" : "accent"}>{c.track === "STUDIO" ? "Studio" : "Student"}</Badge>
                         {c.isOpen ? <Badge tone="success">Open</Badge> : <Badge>Closed</Badge>}
                       </div>
                       <p className="mt-1 text-sm text-muted">
@@ -60,11 +61,18 @@ export default async function CohortsPage() {
         </div>
 
         <section className="card h-fit">
-          <h2 className="mb-5 text-xl text-ink">New cohort</h2>
-          <ActionForm action={createCohort} submitLabel="Create cohort" resetOnSuccess>
+          <h2 className="mb-5 text-xl text-ink">New intake</h2>
+          <ActionForm action={createCohort} submitLabel="Create intake" resetOnSuccess>
+            <div>
+              <label className="label" htmlFor="track">Programme</label>
+              <select id="track" name="track" className="input">
+                <option value="STUDIO">Studio mentorship (Kelly)</option>
+                <option value="STUDENT">Student pairing</option>
+              </select>
+            </div>
             <div>
               <label className="label" htmlFor="name">Name</label>
-              <input id="name" name="name" required placeholder="e.g. Spring 2027" className="input" />
+              <input id="name" name="name" required placeholder="e.g. Studio mentorship — Spring 2027" className="input" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>

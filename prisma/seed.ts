@@ -4,7 +4,8 @@
  *
  * Local logins (all use the password in DEMO_PASSWORD below):
  *   admin@example.com    — admin
- *   maya@example.com     — mentor
+ *   kelly@example.com    — mentor (studio mentorship)
+ *   maya@example.com     — mentor (student pairing)
  *   sam@example.com      — mentee (active, matched with Maya)
  */
 import { PrismaClient } from "@prisma/client";
@@ -37,6 +38,16 @@ async function main() {
   const now = Date.now();
 
   await prisma.user.create({ data: { name: "Alex Admin", email: "admin@example.com", role: "ADMIN", passwordHash } });
+  await prisma.user.create({
+    data: {
+      name: "Kelly O'Neill",
+      email: "kelly@example.com",
+      role: "MENTOR",
+      passwordHash,
+      headline: "Founder, balance studios",
+      bio: "Kelly built balance into Ireland's fastest-growing Pilates studio and now mentors studio owners one-to-one.",
+    },
+  });
   const maya = await prisma.user.create({
     data: {
       name: "Maya Okafor",
@@ -59,7 +70,7 @@ async function main() {
 
   const current = await prisma.cohort.create({
     data: {
-      name: "Autumn 2026",
+      name: "Student pairing — Autumn 2026",
       description: "Our pilot cohort.",
       startDate: new Date(now - 14 * day),
       endDate: new Date(now + 70 * day),
@@ -70,12 +81,38 @@ async function main() {
   });
   const next = await prisma.cohort.create({
     data: {
-      name: "Spring 2027",
+      name: "Student pairing — Spring 2027",
       description: "Twelve weeks, six one-to-one sessions, and a goal plan you build with your mentor.",
       startDate: new Date(now + 120 * day),
       endDate: new Date(now + 204 * day),
       priceCents: 49500,
       capacity: 12,
+    },
+  });
+
+  const studio = await prisma.cohort.create({
+    data: {
+      name: "Studio mentorship — 2027 intake",
+      track: "STUDIO",
+      description: "A studio deep-dive with Kelly, a tailored plan, and monthly one-to-one sessions for six months.",
+      startDate: new Date(now + 45 * day),
+      endDate: new Date(now + 225 * day),
+      priceCents: 180000,
+      capacity: 6,
+    },
+  });
+  await prisma.application.create({
+    data: {
+      name: "Aoife Brennan",
+      email: "aoife.studio@example.com",
+      cohortId: studio.id,
+      currentRole: "Owner and lead instructor",
+      studioName: "Core & Co Pilates",
+      studioLocation: "Galway",
+      studioStage: "Open 1–3 years",
+      background: "Eight reformers, three part-time instructors, about 60 classes a week. Mornings are full but evenings are half empty.",
+      goals: "Fix the evening timetable, stop teaching 25 classes a week myself, and decide whether to open a second room.",
+      linkedinUrl: "https://instagram.com/example",
     },
   });
 
@@ -183,7 +220,7 @@ async function main() {
     ],
   });
 
-  console.log(`Seeded. Log in with admin@example.com / maya@example.com / sam@example.com — password: ${DEMO_PASSWORD}`);
+  console.log(`Seeded. Log in with admin@ / kelly@ / maya@ / sam@example.com — password: ${DEMO_PASSWORD}`);
 }
 
 main()

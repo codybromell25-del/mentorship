@@ -134,7 +134,8 @@ export async function setEnrollmentStatus(enrollmentId: string, status: "COMPLET
 
 const cohortSchema = z
   .object({
-    name: z.string().trim().min(2, "Name the cohort.").max(120),
+    name: z.string().trim().min(2, "Name the intake.").max(120),
+    track: z.enum(["STUDIO", "STUDENT"]),
     description: z.string().trim().max(1000).optional(),
     startDate: z.iso.date("Pick a start date."),
     endDate: z.iso.date("Pick an end date."),
@@ -152,6 +153,7 @@ export async function createCohort(_prev: ActionState, formData: FormData): Prom
   await prisma.cohort.create({
     data: {
       name: d.name,
+      track: d.track,
       description: d.description || null,
       startDate: new Date(`${d.startDate}T09:00:00Z`),
       endDate: new Date(`${d.endDate}T17:00:00Z`),

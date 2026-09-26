@@ -43,7 +43,7 @@ export default async function AdminOverview() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card">
-          <h2 className="mb-4 text-xl text-ink">Current & upcoming cohorts</h2>
+          <h2 className="mb-4 text-xl text-ink">Current & upcoming intakes</h2>
           {cohorts.length === 0 ? (
             <p className="text-sm text-muted">
               None yet. <Link href="/admin/cohorts" className="underline">Create one</Link>.
