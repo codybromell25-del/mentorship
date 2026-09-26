@@ -1,9 +1,9 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { appUrl } from "@/lib/site";
+import { appUrl, site } from "@/lib/site";
 import { software } from "@/lib/software";
 import { notifyAdmin, sendEmailAsync } from "@/lib/email";
 import { adminSoftwareEnquiryEmail, softwareEnquiryReceivedEmail } from "@/lib/emails";
@@ -19,7 +19,20 @@ const schema = z.object({
 
 export type EnquiryState = { error?: string; values?: Record<string, string> } | null;
 
-export async function submitSoftwareEnquiry(_prev: EnquiryState, formData: FormData): Promise<EnquiryState> {
+export async function submitSoftwareEnquiry(prev: EnquiryState, formData: FormData): Promise<EnquiryState> {
+  try {
+    return await handleEnquiry(prev, formData);
+  } catch (e) {
+    unstable_rethrow(e); // lets redirect("/balancehq/thanks") through
+    console.error("[balancehq] enquiry failed:", e);
+    return {
+      error: `We couldn't send your enquiry just now. Please try again shortly, or email ${site.contactEmail}.`,
+      values: Object.fromEntries([...formData].map(([k, v]) => [k, String(v)])),
+    };
+  }
+}
+
+async function handleEnquiry(_prev: EnquiryState, formData: FormData): Promise<EnquiryState> {
   const raw = Object.fromEntries(
     ["name", "email", "studioName", "studioLocation", "bookingSystem", "message"].map((k) => [k, String(formData.get(k) ?? "")]),
   );

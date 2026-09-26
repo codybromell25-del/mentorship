@@ -14,5 +14,12 @@ export const site = {
 };
 
 export function appUrl(): string {
-  return (process.env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  // Explicit setting wins; on Vercel fall back to the project's own URL
+  // so a fresh deployment works without configuring anything.
+  const explicit = process.env.NEXTAUTH_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  const vercelHost =
+    process.env.VERCEL_ENV === "production" ? process.env.VERCEL_PROJECT_PRODUCTION_URL : process.env.VERCEL_URL;
+  if (vercelHost) return `https://${vercelHost}`;
+  return "http://localhost:3000";
 }

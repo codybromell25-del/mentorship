@@ -9,6 +9,10 @@ import { randomToken, issueAuthToken } from "@/lib/tokens";
 import { sendEmailAsync } from "@/lib/email";
 import { acceptedEmail, accountSetupEmail, mentorAssignedEmail, rejectedEmail, waitlistedEmail } from "@/lib/emails";
 import type { ActionState } from "@/components/ActionForm";
+import { emailEnabled } from "@/lib/config";
+
+/** Until email is switched on, admins get the link to pass on themselves. */
+const shareNote = (url: string) => (emailEnabled() ? "" : ` Email isn't switched on yet, so send them this link yourself: ${url}`);
 
 const requireAdmin = () => requireUser(["ADMIN"]);
 
@@ -41,6 +45,7 @@ export async function acceptApplication(applicationId: string): Promise<ActionSt
     });
   });
 
+  const payUrl = `${appUrl()}/pay/${enrollment.paymentToken}`;
   sendEmailAsync({
     to: app.email,
     ...acceptedEmail({
@@ -48,11 +53,11 @@ export async function acceptApplication(applicationId: string): Promise<ActionSt
       cohortName: app.cohort.name,
       amountCents: enrollment.amountCents,
       currency: enrollment.currency,
-      payUrl: `${appUrl()}/pay/${enrollment.paymentToken}`,
+      payUrl,
     }),
   });
   revalidatePath("/admin", "layout");
-  return { ok: `Accepted — payment link emailed to ${app.email}.` };
+  return { ok: `Accepted — payment link emailed to ${app.email}.${shareNote(payUrl)}` };
 }
 
 export async function decideApplication(applicationId: string, status: "WAITLISTED" | "REJECTED"): Promise<ActionState> {
@@ -80,6 +85,7 @@ export async function resendPaymentLink(enrollmentId: string): Promise<ActionSta
   await requireAdmin();
   const e = await prisma.enrollment.findUnique({ where: { id: enrollmentId }, include: { application: true, cohort: true } });
   if (!e || e.status !== "AWAITING_PAYMENT") return { error: "No payment is pending for this enrollment." };
+  const payUrl = `${appUrl()}/pay/${e.paymentToken}`;
   sendEmailAsync({
     to: e.application.email,
     ...acceptedEmail({
@@ -87,10 +93,10 @@ export async function resendPaymentLink(enrollmentId: string): Promise<ActionSta
       cohortName: e.cohort.name,
       amountCents: e.amountCents,
       currency: e.currency,
-      payUrl: `${appUrl()}/pay/${e.paymentToken}`,
+      payUrl,
     }),
   });
-  return { ok: "Payment link re-sent." };
+  return { ok: `Payment link re-sent.${shareNote(payUrl)}` };
 }
 
 // ─── Enrollments ────────────────────────────────────────────────────
@@ -198,10 +204,11 @@ export async function createMentor(_prev: ActionState, formData: FormData): Prom
     data: { name: d.name, email: d.email, headline: d.headline || null, bio: d.bio || null, role: "MENTOR" },
   });
   const token = await issueAuthToken(user.id, "ACCOUNT_SETUP");
-  sendEmailAsync({ to: user.email, ...accountSetupEmail({ name: user.name, url: `${appUrl()}/set-password/${token}`, isMentor: true }) });
+  const setupUrl = `${appUrl()}/set-password/${token}`;
+  sendEmailAsync({ to: user.email, ...accountSetupEmail({ name: user.name, url: setupUrl, isMentor: true }) });
 
   revalidatePath("/admin/mentors");
-  return { ok: `${d.name} added — setup email sent.` };
+  return { ok: `${d.name} added — setup email sent.${shareNote(setupUrl)}` };
 }
 
 export async function updateMentorProfile(userId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {

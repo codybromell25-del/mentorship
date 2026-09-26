@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { homeFor } from "@/lib/session";
+import { accountsEnabled } from "@/lib/config";
 
 /**
  * Next 16 route proxy (formerly middleware.ts).
@@ -13,7 +14,7 @@ import { homeFor } from "@/lib/session";
  * Pages and server actions re-check with requireUser(); this is the
  * first line of defence, not the only one.
  */
-export default auth((req) => {
+const withAuth = auth((req) => {
   const { pathname } = req.nextUrl;
   const role = req.auth?.user?.role;
   const isLoggedIn = !!req.auth;
@@ -39,6 +40,16 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
+export default function proxy(req: NextRequest) {
+  // A deployment without a database or AUTH_SECRET serves the public site
+  // only: show a friendly page here instead of a server error.
+  if (!accountsEnabled()) {
+    return NextResponse.rewrite(new URL("/unavailable", req.url));
+  }
+  // Our callback ignores the second (route-context) argument.
+  return withAuth(req, { params: Promise.resolve({}) });
+}
+
 export const config = {
-  matcher: ["/dashboard/:path*", "/mentor/:path*", "/admin/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/mentor/:path*", "/admin/:path*", "/login", "/home", "/setup"],
 };

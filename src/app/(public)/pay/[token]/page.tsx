@@ -33,6 +33,7 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
   }
 
   const devMode = process.env.NODE_ENV !== "production" && !stripeConfigured();
+  const paymentsOff = process.env.NODE_ENV === "production" && !stripeConfigured();
 
   return (
     <div className="mx-auto max-w-lg px-6 py-20">
@@ -49,7 +50,11 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
           </div>
         </dl>
 
-        {devMode ? (
+        {paymentsOff ? (
+          <p className="mt-6 rounded-lg bg-surface-muted px-4 py-3 text-sm text-ink">
+            Online payment isn&apos;t switched on yet. We&apos;ll be in touch shortly to confirm your place.
+          </p>
+        ) : devMode ? (
           <form action={simulatePayment.bind(null, token)} className="mt-6">
             <p className="mb-3 rounded-lg bg-warning-soft px-3 py-2 text-xs text-warning">
               Development mode: Stripe isn&apos;t configured, so this button marks the place as paid without charging.

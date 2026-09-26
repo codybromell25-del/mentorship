@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Libre_Baskerville, Raleway } from "next/font/google";
 import { appUrl, site } from "@/lib/site";
+import { indexingAllowed } from "@/lib/config";
 import "./globals.css";
 
 // Same fonts as balance education, self-hosted via next/font.
@@ -31,6 +32,8 @@ export const metadata: Metadata = {
     images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "The reformer room at balance studios" }],
   },
   twitter: { card: "summary_large_image" },
+  // Draft copy stays out of search results until ALLOW_INDEXING=true.
+  robots: indexingAllowed() ? undefined : { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

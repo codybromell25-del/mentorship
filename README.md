@@ -71,19 +71,52 @@ the OAuth consent screen, create a Web OAuth client with redirect URI
 `GOOGLE_CLIENT_SECRET`. While the consent screen is in "Testing", add each
 mentor's Google address as a test user.
 
-## Going live
+## Deploy to Vercel
 
-1. Create a Postgres database (Supabase or Neon) and set `DATABASE_URL` / `DIRECT_URL`.
-2. Run `npx prisma db push` against it, then create your admin account (for
-   example via `npx prisma studio`, then use "Forgot password" to set a password).
-3. Deploy on Vercel with every variable from `.env.example`.
-4. In Stripe, add a webhook to `https://<your-domain>/api/stripe/webhook` for
-   `checkout.session.completed` and `checkout.session.async_payment_succeeded`,
-   and set `STRIPE_WEBHOOK_SECRET`.
-5. Verify your sending domain in Resend and set `RESEND_API_KEY` and `EMAIL_FROM`.
+The site switches on in stages, so it can go live before everything is set up.
+
+### 1. Public site (no settings needed)
+
+Drop the project (a clean `.zip` of the repo, no `node_modules`, `.next` or
+`.env`) on [vercel.com/drop](https://vercel.com/drop). With no environment
+variables the whole marketing site works: intakes show "the next intake opens
+soon", sign-in pages show "Accounts are opening soon", and search engines are
+kept out.
+
+Each drop creates a new project, so afterwards connect this GitHub repo in
+Project → Settings → Git. Every push to `main` then redeploys the same URL.
+
+### 2. Accounts, applications and dashboards
+
+1. Create a Postgres database. Supabase: new project, region West EU (Ireland).
+   Then Connect → copy the **Transaction pooler** string (port 6543) as
+   `DATABASE_URL` with `?pgbouncer=true` on the end, and the **Session pooler**
+   string (port 5432) as `DIRECT_URL`. (Same pattern as the Balance project.)
+2. In Vercel → Settings → Environment Variables add `DATABASE_URL`,
+   `DIRECT_URL`, `AUTH_SECRET` (`openssl rand -base64 32`) and `SETUP_CODE`
+   (any long random string).
+3. Redeploy. On production builds `scripts/vercel-build.mjs` runs
+   `prisma db push`, which creates the tables. It refuses destructive
+   changes, so a risky schema change fails the build rather than losing data.
+4. Open `/setup`, enter the setup code and create the first admin account.
+   The page switches itself off once an admin exists.
+5. In admin, add Kelly under Mentors and create real intakes. Until email is on,
+   admin shows the setup and payment links so you can send them yourself.
+
+### 3. Optional extras
+
+- **Email:** `RESEND_API_KEY`, `EMAIL_FROM` (a verified domain, e.g. the one
+  Balance uses) and `ADMIN_NOTIFY_EMAIL`.
+- **Payments:** `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`, with a Stripe
+  webhook to `https://<your-domain>/api/stripe/webhook` for
+  `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
+  Without Stripe, payment links say "we'll be in touch".
+- **Google Meet:** see Video calls above.
+- **Custom domain:** add it in Settings → Domains and set `NEXTAUTH_URL` to it.
+  Without `NEXTAUTH_URL` the app uses the Vercel project URL automatically.
+- **Search engines:** once Kelly approves the copy, set `ALLOW_INDEXING=true`
+  and redeploy.
 
 Rename the programme and set the contact email and timezone in `src/lib/site.ts`.
-
-Landing-page wording marked `COPY:` in `src/app/(public)/page.tsx` is placeholder
-text to confirm with Kelly. Photos in `public/images` are web-sized copies of
-the balance education site's images.
+Photos in `public/images` are web-sized copies of the balance education site's
+images.

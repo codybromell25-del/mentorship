@@ -1,9 +1,9 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { appUrl } from "@/lib/site";
+import { appUrl, site } from "@/lib/site";
 import { notifyAdmin, sendEmailAsync } from "@/lib/email";
 import { adminNewApplicationEmail, applicationReceivedEmail } from "@/lib/emails";
 import { DISCIPLINES, INSTRUCTOR_STAGES } from "@/content/instructors";
@@ -31,7 +31,19 @@ const studioSchema = z.object({
 
 export type ApplyState = { error?: string; values?: Record<string, string> } | null;
 
-export async function submitApplication(_prev: ApplyState, formData: FormData): Promise<ApplyState> {
+const UNAVAILABLE = `We couldn't send your application just now. Please try again shortly, or email ${site.contactEmail}.`;
+
+export async function submitApplication(prev: ApplyState, formData: FormData): Promise<ApplyState> {
+  try {
+    return await handleApplication(prev, formData);
+  } catch (e) {
+    unstable_rethrow(e); // lets redirect("/apply/thanks") through
+    console.error("[apply] failed:", e);
+    return { error: UNAVAILABLE, values: Object.fromEntries([...formData].map(([k, v]) => [k, String(v)])) };
+  }
+}
+
+async function handleApplication(_prev: ApplyState, formData: FormData): Promise<ApplyState> {
   const raw = Object.fromEntries(
     ["name", "email", "cohortId", "currentRole", "background", "goals", "linkedinUrl", "studioName", "studioLocation", "studioStage", "wantsSoftware", "instructorStage", "disciplines"].map((k) => [k, String(formData.get(k) ?? "")]),
   );
