@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MENTEE
+  MENTOR
+  ADMIN
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED // payment link sent; see Enrollment
+  WAITLISTED
+  REJECTED
+}
+
+enum EnrollmentStatus {
+  AWAITING_PAYMENT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  DONE
+}
+
+enum TokenPurpose {
+  ACCOUNT_SETUP // first password, sent after payment or when an admin adds a mentor
+  PASSWORD_RESET
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String? // null until the account-setup link is used
+  role         Role     @default(MENTEE)
+  headline     String? // mentors: one-line summary shown to mentees
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollments       Enrollment[] @relation("MenteeEnrollments")
+  mentoring         Enrollment[] @relation("MentorEnrollments")
+  meetingsCreated   Meeting[]
+  authTokens        AuthToken[]
+}
+
+/// One run of the programme, e.g. "Spring 2027". Applications and
+/// enrollments hang off a cohort; price is fixed per cohort.
+model Cohort {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  priceCents   Int
+  currency     String   @default("eur")
+  capacity     Int
+  isOpen       Boolean  @default(true) // accepting applications
+  createdAt    DateTime @default(now())
+
+  applications Application[]
+  enrollments  Enrollment[]
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  name        String
+  email       String
+  cohortId    String
+  currentRole String
+  goals       String // what they want out of the programme
+  background  String
+  linkedinUrl String?
+  status      ApplicationStatus @default(PENDING)
+  adminNotes  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime          @default(now())
+
+  cohort     Cohort      @relation(fields: [cohortId], references: [id], onDelete: Restrict)
+  enrollment Enrollment?
+
+  @@index([cohortId, status])
+  @@index([email])
+}
+
+/// Created when an admin accepts an application. Becomes ACTIVE once
+/// paid, at which point the mentee's User is created (menteeId set).
+model Enrollment {
+  id              String           @id @default(cuid())
+  applicationId   String           @unique
+  cohortId        String
+  menteeId        String?
+  mentorId        String?
+  status          EnrollmentStatus @default(AWAITING_PAYMENT)
+  paymentToken    String           @unique // unguessable, used in the /pay/[token] link
+  amountCents     Int
+  currency        String
+  stripeSessionId String?          @unique
+  paidAt          DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  cohort      Cohort      @relation(fields: [cohortId], references: [id], onDelete: Restrict)
+  mentee      User?       @relation("MenteeEnrollments", fields: [menteeId], references: [id], onDelete: SetNull)
+  mentor      User?       @relation("MentorEnrollments", fields: [mentorId], references: [id], onDelete: SetNull)
+  meetings    Meeting[]
+  goals       Goal[]
+
+  @@index([menteeId])
+  @@index([mentorId])
+  @@index([cohortId, status])
+}
+
+/// A 1:1 session between mentor and mentee.
+model Meeting {
+  id           String        @id @default(cuid())
+  enrollmentId String
+  scheduledAt  DateTime
+  durationMin  Int           @default(45)
+  location     String? // video link or place
+  agenda       String?
+  notes        String? // written by the mentor after the session; visible to the mentee
+  status       MeetingStatus @default(SCHEDULED)
+  createdById  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  createdBy  User       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([enrollmentId, scheduledAt])
+}
+
+model Goal {
+  id           String     @id @default(cuid())
+  enrollmentId String
+  title        String
+  detail       String?
+  status       GoalStatus @default(NOT_STARTED)
+  dueDate      DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId])
+}
+
+/// Single-use tokens for account setup and password reset. Only the
+/// SHA-256 hash is stored; the raw token lives in the emailed link.
+model AuthToken {
+  id        String       @id @default(cuid())
+  tokenHash String       @unique
+  userId    String
+  purpose   TokenPurpose
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mentorship-dev",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["/Users/codybromell/Documents/Mentorship/start-dev.sh"],
+      "port": 3000
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/session";
+import { PageHeader, StatusBadge } from "@/components/ui";
+import { GoalList } from "@/components/mentorship/GoalList";
+import { MeetingList } from "@/components/mentorship/MeetingList";
+import { ScheduleMeetingForm } from "@/components/mentorship/ScheduleMeetingForm";
+
+export const metadata = { title: "Mentee" };
+
+export default async function MenteeDetail({ params }: { params: Promise<{ enrollmentId: string }> }) {
+  const { enrollmentId } = await params;
+  const user = await requireUser(["MENTOR", "ADMIN"]);
+
+  const e = await prisma.enrollment.findUnique({
+    where: { id: enrollmentId },
+    include: {
+      mentee: { select: { name: true, email: true } },
+      cohort: { select: { name: true } },
+      application: { select: { currentRole: true, goals: true, background: true, linkedinUrl: true } },
+      meetings: true,
+      goals: { orderBy: { createdAt: "asc" } },
+    },
+  });
+  if (!e || (e.mentorId !== user.id && user.role !== "ADMIN")) notFound();
+
+  const active = e.status === "ACTIVE";
+
+  return (
+    <>
+      <Link href="/mentor" className="mb-6 inline-block text-sm text-muted hover:text-ink">← All mentees</Link>
+      <PageHeader eyebrow={e.cohort.name} title={e.mentee?.name ?? "Mentee"}>
+        <div className="flex items-center gap-3">
+          <StatusBadge status={e.status} />
+          {e.mentee && <a href={`mailto:${e.mentee.email}`} className="btn btn-ghost btn-sm">Email</a>}
+        </div>
+      </PageHeader>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-6">
+          <MeetingList meetings={e.meetings} canManage={active} />
+          <GoalList enrollmentId={e.id} goals={e.goals} canEdit={active} />
+        </div>
+        <div className="space-y-6">
+          {active && <ScheduleMeetingForm enrollmentId={e.id} />}
+          <section className="card text-sm">
+            <h2 className="mb-4 text-xl text-ink">From their application</h2>
+            <p className="text-xs text-muted uppercase">Current role</p>
+            <p className="mt-1 mb-4 text-ink">{e.application.currentRole}</p>
+            <p className="text-xs text-muted uppercase">Wants from mentorship</p>
+            <p className="mt-1 mb-4 whitespace-pre-line text-ink">{e.application.goals}</p>
+            <p className="text-xs text-muted uppercase">Background</p>
+            <p className="mt-1 whitespace-pre-line text-ink">{e.application.background}</p>
+            {e.application.linkedinUrl && (
+              <a href={e.application.linkedinUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block underline">LinkedIn profile</a>
+            )}
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
