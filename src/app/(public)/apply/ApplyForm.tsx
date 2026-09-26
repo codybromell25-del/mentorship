@@ -117,8 +117,8 @@ export function ApplyForm({
         <label className="flex items-start gap-3 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm text-ink">
           <input type="checkbox" name="wantsSoftware" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" defaultChecked={v.wantsSoftware === "on"} />
           <span>
-            I&apos;m interested in <span className="font-medium">balanceHQ</span> studio software: reporting, instructor KPIs,
-            time off and more.
+            I&apos;d also like to hear about <span className="font-medium">balanceHQ</span> studio software (sold separately):
+            reporting, instructor KPIs, time off and more.
           </span>
         </label>
       )}

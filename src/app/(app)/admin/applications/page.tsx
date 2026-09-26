@@ -56,7 +56,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                   <p className="flex items-center gap-2 font-medium text-ink">
                     {a.name}
                     <Badge tone={a.cohort.track === "STUDIO" ? "success" : "accent"}>{a.cohort.track === "STUDIO" ? "Studio" : "Student"}</Badge>
-                    {a.wantsSoftware && <Badge tone="warning">Wants balanceHQ</Badge>}
+                    {a.wantsSoftware && <Badge tone="warning">balanceHQ lead</Badge>}
                   </p>
                   <p className="text-sm text-muted">
                     {a.email} · {a.studioName ? `${a.studioName}, ${a.studioLocation}` : a.currentRole}

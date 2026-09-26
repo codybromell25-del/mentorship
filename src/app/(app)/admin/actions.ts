@@ -212,3 +212,13 @@ export async function updateMentorProfile(userId: string, _prev: ActionState, fo
   revalidatePath("/admin/mentors");
   return { ok: "Profile saved." };
 }
+
+// ─── balanceHQ enquiries ────────────────────────────────────────────
+
+export async function toggleEnquiryHandled(enquiryId: string) {
+  await requireAdmin();
+  const e = await prisma.softwareEnquiry.findUnique({ where: { id: enquiryId } });
+  if (!e) return;
+  await prisma.softwareEnquiry.update({ where: { id: enquiryId }, data: { handled: !e.handled } });
+  revalidatePath("/admin", "layout");
+}

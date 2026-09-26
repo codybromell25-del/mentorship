@@ -7,7 +7,7 @@ export const metadata = { title: "Admin" };
 
 export default async function AdminOverview() {
   const now = new Date();
-  const [pending, awaitingPayment, active, unassigned, revenue, upcoming, cohorts] = await Promise.all([
+  const [pending, awaitingPayment, active, unassigned, revenue, upcoming, cohorts, enquiries] = await Promise.all([
     prisma.application.count({ where: { status: "PENDING" } }),
     prisma.enrollment.count({ where: { status: "AWAITING_PAYMENT" } }),
     prisma.enrollment.count({ where: { status: "ACTIVE" } }),
@@ -24,17 +24,19 @@ export default async function AdminOverview() {
       orderBy: { startDate: "asc" },
       include: { _count: { select: { enrollments: { where: { status: { in: ["AWAITING_PAYMENT", "ACTIVE"] } } } } } },
     }),
+    prisma.softwareEnquiry.count({ where: { handled: false } }),
   ]);
 
   return (
     <>
       <PageHeader eyebrow="Admin" title="Overview" />
 
-      <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-6">
         <Stat label="To review" value={pending} href="/admin/applications" />
         <Stat label="Awaiting payment" value={awaitingPayment} href="/admin/enrollments?status=AWAITING_PAYMENT" />
         <Stat label="Active mentees" value={active} href="/admin/enrollments" />
         <Stat label="Need a mentor" value={unassigned} href="/admin/enrollments?unassigned=1" />
+        <Stat label="balanceHQ enquiries" value={enquiries} href="/admin/enquiries" />
         <Stat
           label="Revenue"
           value={revenue.length ? revenue.map((r) => formatMoney(r._sum.amountCents ?? 0, r.currency)).join(" + ") : "—"}

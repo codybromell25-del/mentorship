@@ -4,6 +4,7 @@
 import { site } from "@/lib/site";
 import { formatDateTime, formatMoney } from "@/lib/format";
 import { renderEmail } from "@/lib/emails/layout";
+import { softwareName } from "@/lib/software";
 
 type Email = { subject: string; html: string; text: string };
 
@@ -141,4 +142,20 @@ export function meetingCancelledEmail(a: { name: string; otherName: string; when
     `Hi ${a.name},`,
     `Your session with ${a.otherName} on ${formatDateTime(a.when)} has been cancelled. They'll be in touch to find a new time.`,
   ]);
+}
+
+export function softwareEnquiryReceivedEmail(a: { name: string }): Email {
+  return build("Thanks for your balanceHQ enquiry", "We've got your enquiry", [
+    `Hi ${a.name},`,
+    "Thanks for your interest in balanceHQ. We'll be in touch within a few days with pricing and a time for a demo.",
+  ]);
+}
+
+export function adminSoftwareEnquiryEmail(a: { name: string; email: string; studioName: string; tools: string[]; url: string }): Email {
+  return build(
+    `balanceHQ enquiry: ${a.studioName}`,
+    "New balanceHQ enquiry",
+    [`${a.name} (${a.email}) from ${a.studioName} is interested in: ${a.tools.map(softwareName).join(", ")}.`],
+    { label: "View enquiries", url: a.url },
+  );
 }
