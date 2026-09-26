@@ -51,5 +51,17 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/mentor/:path*", "/admin/:path*", "/login", "/home", "/setup"],
+  // Everything that needs the database or sign-in. Payment and password
+  // links only exist once accounts are on, but may be visited before.
+  matcher: [
+    "/dashboard/:path*",
+    "/mentor/:path*",
+    "/admin/:path*",
+    "/login",
+    "/home",
+    "/setup",
+    "/forgot-password",
+    "/set-password/:path*",
+    "/pay/:path*",
+  ],
 };
