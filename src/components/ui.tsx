@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 const tones = {
   neutral: "bg-surface-muted text-muted",
-  accent: "bg-accent-soft text-accent",
+  accent: "bg-gold-soft text-gold-ink",
   success: "bg-success-soft text-success",
   warning: "bg-warning-soft text-warning",
   danger: "bg-danger-soft text-danger",

@@ -1,21 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3ee;
-  --foreground: #1d2530;
+  /* Palette matches balance education (balance-course/src/app/globals.css). */
+  --background: #f2ede8;
+  --foreground: #1e1a1a;
   --surface: #ffffff;
-  --surface-muted: #efeae2;
-  --ink: #1d2530;
-  --muted: #6b645d;
-  --border: #e6e0d6;
-  --accent: #b4532a;
-  --accent-soft: #f3dfd3;
-  --success: #2f6b4f;
-  --success-soft: #dcebe2;
-  --warning: #9a6310;
-  --warning-soft: #f5e7cc;
-  --danger: #b3261e;
-  --danger-soft: #f6dcd9;
+  --surface-muted: #f7f3ef;
+  --ink: #1e1a1a;
+  --muted: #6b6563;
+  --border: #ddd5cc;
+  --accent: #1e4d4a; /* balance sage */
+  --accent-dark: #163936;
+  --accent-soft: #c5dcd9;
+  --gold: #c9a96e;
+  --gold-soft: #efe4cf;
+  --gold-ink: #8a6d35; /* gold dark enough for text on gold-soft */
+  --success: #1e4d4a;
+  --success-soft: #c5dcd9;
+  --warning: #8a6d35;
+  --warning-soft: #efe4cf;
+  --danger: #c44b4b;
+  --danger-soft: #f5dddd;
 }
 
 @theme inline {
@@ -27,15 +32,19 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
   --color-accent-soft: var(--accent-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-ink: var(--gold-ink);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --font-heading: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-libre), "Libre Baskerville", Georgia, "Times New Roman", serif;
+  --font-body: var(--font-raleway), "Raleway", system-ui, -apple-system, sans-serif;
 }
 
 body {
@@ -44,26 +53,29 @@ body {
   font-family: var(--font-body);
 }
 
-h1, h2, h3 {
+/* Same typography as balance: Raleway body, Libre Baskerville headings in italic. */
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  letter-spacing: -0.01em;
+  font-style: italic;
+  font-weight: 400;
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background-color: var(--accent-soft);
+  color: var(--ink);
 }
 
 /* Shared primitives. Pages compose these rather than repeating long
    utility strings for every button and input. */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-xs font-medium tracking-[0.2em] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-ink text-white hover:bg-ink/85;
+    @apply bg-ink text-white hover:bg-ink/90;
   }
   .btn-accent {
-    @apply bg-accent text-white hover:bg-accent/90;
+    @apply bg-accent text-white hover:bg-accent-dark;
   }
   .btn-ghost {
     @apply border border-border bg-surface text-ink hover:bg-surface-muted;
@@ -72,7 +84,7 @@ h1, h2, h3 {
     @apply border border-danger/30 bg-surface text-danger hover:bg-danger-soft;
   }
   .btn-sm {
-    @apply px-3.5 py-1.5 text-xs;
+    @apply px-4 py-2 text-[10px] tracking-[0.15em];
   }
   .card {
     @apply rounded-2xl border border-border bg-surface p-6;
@@ -81,13 +93,13 @@ h1, h2, h3 {
     @apply mb-1.5 block text-sm font-medium text-ink;
   }
   .input {
-    @apply w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:border-ink focus:outline-none;
+    @apply w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:border-accent focus:outline-2 focus:outline-offset-1 focus:outline-accent;
   }
   .hint {
     @apply mt-1 text-xs text-muted;
   }
   .eyebrow {
-    @apply text-xs font-medium tracking-[0.18em] text-accent uppercase;
+    @apply text-xs tracking-[0.3em] text-accent uppercase;
   }
   .table {
     @apply w-full text-left text-sm;

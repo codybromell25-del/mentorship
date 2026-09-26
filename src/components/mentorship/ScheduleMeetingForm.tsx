@@ -8,7 +8,7 @@ export function ScheduleMeetingForm({ enrollmentId }: { enrollmentId: string }) 
       <h2 className="mb-1 text-xl text-ink">Book a session</h2>
       <p className="mb-5 text-sm text-muted">Times are in {site.timeZone}. Your mentee gets an email.</p>
       <ActionForm action={scheduleMeeting.bind(null, enrollmentId)} submitLabel="Book session" pendingText="Booking…" resetOnSuccess>
-        <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+        <div className="grid grid-cols-[minmax(0,1fr)_88px] gap-3">
           <div>
             <label className="label" htmlFor="scheduledAt">Date & time</label>
             <input id="scheduledAt" name="scheduledAt" type="datetime-local" required className="input" />
