@@ -27,7 +27,7 @@ export type ApplyState = { error?: string; values?: Record<string, string> } | n
 
 export async function submitApplication(_prev: ApplyState, formData: FormData): Promise<ApplyState> {
   const raw = Object.fromEntries(
-    ["name", "email", "cohortId", "currentRole", "background", "goals", "linkedinUrl", "studioName", "studioLocation", "studioStage"].map((k) => [k, String(formData.get(k) ?? "")]),
+    ["name", "email", "cohortId", "currentRole", "background", "goals", "linkedinUrl", "studioName", "studioLocation", "studioStage", "wantsSoftware"].map((k) => [k, String(formData.get(k) ?? "")]),
   );
 
   // Honeypot: real users never see or fill this field.
@@ -54,7 +54,7 @@ export async function submitApplication(_prev: ApplyState, formData: FormData): 
   if (duplicate) return { error: "You've already applied for this intake — we'll be in touch.", values: raw };
 
   await prisma.application.create({
-    data: { ...data, ...studio, linkedinUrl: data.linkedinUrl || null, cohortId: cohort.id },
+    data: { ...data, ...studio, wantsSoftware: studio ? formData.get("wantsSoftware") === "on" : false, linkedinUrl: data.linkedinUrl || null, cohortId: cohort.id },
   });
 
   sendEmailAsync({ to: data.email, ...applicationReceivedEmail({ name: data.name, cohortName: cohort.name }) });

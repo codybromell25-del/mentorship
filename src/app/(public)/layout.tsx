@@ -15,6 +15,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </Link>
           <nav className="flex items-center gap-2 sm:gap-5">
             <Link href="/#studio" className="hidden text-sm text-muted hover:text-ink md:block">Studio mentorship</Link>
+            <Link href="/#software" className="hidden text-sm text-muted hover:text-ink md:block">balanceHQ</Link>
             <Link href="/#students" className="hidden text-sm text-muted hover:text-ink md:block">Student pairing</Link>
             <Link href="/login" className="btn btn-ghost btn-sm">Sign in</Link>
           </nav>

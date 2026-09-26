@@ -113,6 +113,16 @@ export function ApplyForm({
         <p className="hint">The more specific, the better.</p>
       </div>
 
+      {studio && (
+        <label className="flex items-start gap-3 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm text-ink">
+          <input type="checkbox" name="wantsSoftware" className="mt-0.5 h-4 w-4 accent-[var(--accent)]" defaultChecked={v.wantsSoftware === "on"} />
+          <span>
+            I&apos;m interested in <span className="font-medium">balanceHQ</span> studio software: reporting, instructor KPIs,
+            time off and more.
+          </span>
+        </label>
+      )}
+
       {/* Honeypot for bots — hidden from people and screen readers. */}
       <input type="text" name="company" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 

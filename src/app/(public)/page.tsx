@@ -34,6 +34,43 @@ const studioSteps = [
   { title: "One-to-one sessions", body: "Regular sessions with Kelly to work through the plan, adjust, and tackle what comes up." },
 ];
 
+// balanceHQ: studio software offered alongside mentorship. Reporting is
+// the Momence reporting platform already running at balance; the rest
+// are planned. COPY/STATUS: confirm before launch.
+type SoftwareStatus = "In use at balance" | "Coming soon";
+const software: { name: string; body: string; status: SoftwareStatus }[] = [
+  {
+    name: "Studio reporting",
+    body: "Live KPIs from Momence: bookings, class fill rates, new members, churn, revenue and intro-offer conversion, all on one dashboard.",
+    status: "In use at balance",
+  },
+  {
+    name: "Instructor KPI tracker",
+    body: "See each instructor's fill rate, client retention, no-shows and cover given, so reviews and pay rises are based on numbers.",
+    status: "Coming soon",
+  },
+  {
+    name: "Time off & cover",
+    body: "Holiday requests, approvals and a cover board, so a sick day never means a cancelled class.",
+    status: "Coming soon",
+  },
+  {
+    name: "Timetable planner",
+    body: "A fill-rate heatmap by day and time that shows which classes to add, move or cut.",
+    status: "Coming soon",
+  },
+  {
+    name: "Intro offer follow-up",
+    body: "Track every trial client and nudge the team to follow up before the offer ends, turning more first visits into members.",
+    status: "Coming soon",
+  },
+  {
+    name: "Instructor onboarding",
+    body: "Checklists, studio standards and sign-offs for new instructors, so every class feels like your studio.",
+    status: "Coming soon",
+  },
+];
+
 const faqs = [
   {
     q: "Is studio mentorship only for balance-trained instructors?",
@@ -46,6 +83,10 @@ const faqs = [
   {
     q: "What happens after I apply?",
     a: "We review every application personally and reply within a week. If it's a fit, you'll get a link to confirm your place.",
+  },
+  {
+    q: "What is balanceHQ?",
+    a: "The software balance runs on, offered to studio owners as an optional add-on to mentorship. Tell us on your application if you're interested.",
   },
   {
     q: "What is student pairing?",
@@ -148,6 +189,35 @@ export default async function LandingPage() {
           </ol>
           <div className="mt-16">
             <CohortCards cohorts={studio} track="STUDIO" />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── balanceHQ software (add-on for studio owners) ─────────── */}
+      <section id="software" className="scroll-mt-16 bg-ink text-white">
+        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+          <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:items-end">
+            <div>
+              <span className="inline-block rounded-full bg-gold/20 px-4 py-1 text-xs tracking-[0.3em] text-gold uppercase">Also available</span>
+              <h2 className="mt-6 text-4xl leading-tight text-white md:text-5xl">balanceHQ studio software</h2>
+            </div>
+            <p className="leading-relaxed text-white/75">
+              The tools that run balance, built by us for studios like yours. Add them to your mentorship and Kelly can
+              work from your real numbers, not guesses.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+            {software.map((t) => (
+              <article key={t.name} className="bg-ink p-7">
+                <p className={`mb-4 text-[11px] tracking-[0.2em] uppercase ${t.status === "In use at balance" ? "text-gold" : "text-white/50"}`}>{t.status}</p>
+                <h3 className="text-2xl text-white">{t.name}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/70">{t.body}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-12 flex flex-wrap items-center gap-4">
+            <Link href="/apply?track=studio" className="btn bg-gold text-ink hover:bg-gold-soft">Apply and ask about balanceHQ</Link>
+            <a href={`mailto:${site.contactEmail}?subject=balanceHQ`} className="text-sm text-white/70 underline hover:text-white">or email us</a>
           </div>
         </div>
       </section>

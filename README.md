@@ -6,6 +6,13 @@ Two paid 1:1 programmes from balance studios, each with its own intakes:
   with Pilates studio owners, case by case, to steady, grow and run their studio.
 - **Student pairing**: students are matched with a mentor from the balance team.
 
+The landing page also sells **balanceHQ**, balance's studio software, as an
+add-on for studio owners: studio reporting (the Momence reporting platform in
+`~/Documents/momence-dashboard`) plus planned tools (instructor KPIs, time off
+and cover, timetable planner, intro-offer follow-up, instructor onboarding).
+Studio applicants can tick "interested in balanceHQ", which shows as a badge in
+admin.
+
 Public site and applications, admin review, Stripe payment, and dashboards for
 mentees, mentors and admins. Colours, fonts and imagery match balance education.
 

@@ -104,6 +104,7 @@ model Application {
   studioName     String?
   studioLocation String?
   studioStage    String? // e.g. "Opening soon", "1–3 years"
+  wantsSoftware  Boolean @default(false) // interested in balanceHQ studio software
   status      ApplicationStatus @default(PENDING)
   adminNotes  String?
   reviewedAt  DateTime?
