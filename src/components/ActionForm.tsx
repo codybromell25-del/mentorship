@@ -29,13 +29,33 @@ export function ActionForm({
 }) {
   const [state, formAction] = useActionState(action, null);
   const ref = useRef<HTMLFormElement>(null);
+  const submitted = useRef<FormData | null>(null);
 
   useEffect(() => {
-    if (resetOnSuccess && state?.ok) ref.current?.reset();
+    const form = ref.current;
+    if (!form) return;
+    if (resetOnSuccess && state?.ok) form.reset();
+    // React resets uncontrolled forms after every action; on an error,
+    // put back what the user typed so they only have to fix one field.
+    if (state?.error && submitted.current) {
+      for (const [name, value] of submitted.current) {
+        const el = form.elements.namedItem(name);
+        if (typeof value === "string" && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) && el.type !== "hidden") {
+          el.value = value;
+        }
+      }
+    }
   }, [state, resetOnSuccess]);
 
   return (
-    <form ref={ref} action={formAction} className={className}>
+    <form
+      ref={ref}
+      action={(fd) => {
+        submitted.current = fd;
+        formAction(fd);
+      }}
+      className={className}
+    >
       <FormMessage state={state} />
       {children}
       <SubmitButton className={submitClassName} pendingText={pendingText}>

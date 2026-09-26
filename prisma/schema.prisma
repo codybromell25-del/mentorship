@@ -60,6 +60,8 @@ model User {
   role         Role     @default(MENTEE)
   headline     String? // mentors: one-line summary shown to mentees
   bio          String?
+  meetingLink  String? // mentors: personal Google Meet room, used when Calendar isn't connected
+  defaultDurationMin Int @default(45)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -67,6 +69,7 @@ model User {
   mentoring         Enrollment[] @relation("MentorEnrollments")
   meetingsCreated   Meeting[]
   authTokens        AuthToken[]
+  googleAccount     GoogleAccount?
 }
 
 /// One run of the programme, e.g. "Spring 2027". Applications and
@@ -148,7 +151,8 @@ model Meeting {
   enrollmentId String
   scheduledAt  DateTime
   durationMin  Int           @default(45)
-  location     String? // video link or place
+  location     String? // join link (usually Google Meet) or a place
+  googleEventId String? // set when created on the mentor's Google Calendar
   agenda       String?
   notes        String? // written by the mentor after the session; visible to the mentee
   status       MeetingStatus @default(SCHEDULED)
@@ -191,4 +195,18 @@ model AuthToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+/// A mentor's connected Google Calendar. Sessions they book are created
+/// there with a Google Meet link and the mentee invited. The refresh
+/// token is encrypted with a key derived from AUTH_SECRET.
+model GoogleAccount {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  googleEmail           String
+  refreshTokenEncrypted String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

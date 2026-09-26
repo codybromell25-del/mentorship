@@ -26,10 +26,14 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
   if (!e || (e.mentorId !== user.id && user.role !== "ADMIN")) notFound();
 
   const active = e.status === "ACTIVE";
+  const [me, google] = await Promise.all([
+    prisma.user.findUniqueOrThrow({ where: { id: user.id }, select: { defaultDurationMin: true } }),
+    prisma.googleAccount.findUnique({ where: { userId: user.id }, select: { id: true } }),
+  ]);
 
   return (
     <>
-      <Link href="/mentor" className="mb-6 inline-block text-sm text-muted hover:text-ink">← All mentees</Link>
+      <Link href="/mentor" className="mb-6 inline-block text-sm text-muted hover:text-ink">← Overview</Link>
       <PageHeader eyebrow={e.cohort.name} title={e.mentee?.name ?? "Mentee"}>
         <div className="flex items-center gap-3">
           <StatusBadge status={e.status} />
@@ -43,7 +47,7 @@ export default async function MenteeDetail({ params }: { params: Promise<{ enrol
           <GoalList enrollmentId={e.id} goals={e.goals} canEdit={active} />
         </div>
         <div className="space-y-6">
-          {active && <ScheduleMeetingForm enrollmentId={e.id} />}
+          {active && <ScheduleMeetingForm enrollmentId={e.id} defaultDurationMin={me.defaultDurationMin} googleConnected={!!google} />}
           <section className="card text-sm">
             <h2 className="mb-4 text-xl text-ink">From their application</h2>
             {e.application.studioName && (

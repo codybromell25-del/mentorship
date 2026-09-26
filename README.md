@@ -35,6 +35,22 @@ Locally, with no Stripe or Resend keys, emails print to the terminal running
 4. The admin assigns a mentor at `/admin/enrollments` (Kelly for studio owners).
 5. The mentor books sessions, records notes, and tracks goals with the mentee.
 
+## Video calls (Google Meet)
+
+Mentors manage sessions at `/mentor/schedule` (book, reschedule, cancel,
+notes) and connect Google at `/mentor/settings`. With Google connected, each
+booking creates a Calendar event with a Meet link and invites the mentee;
+moves and cancellations sync. Without it, the mentor's saved Meet link is used
+and the app emails the mentee. Google Meet can't be embedded in another site,
+so Join opens Meet in a new tab. Both dashboards show the next session with a
+live countdown and Join button.
+
+To enable Google: in Google Cloud, enable the Google Calendar API, set up
+the OAuth consent screen, create a Web OAuth client with redirect URI
+`<NEXTAUTH_URL>/api/google/callback`, then set `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET`. While the consent screen is in "Testing", add each
+mentor's Google address as a test user.
+
 ## Going live
 
 1. Create a Postgres database (Supabase or Neon) and set `DATABASE_URL` / `DIRECT_URL`.

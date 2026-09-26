@@ -27,6 +27,7 @@ const token = () => randomBytes(24).toString("base64url");
 async function main() {
   // Wipe in dependency order so the seed is re-runnable.
   await prisma.authToken.deleteMany();
+  await prisma.googleAccount.deleteMany();
   await prisma.meeting.deleteMany();
   await prisma.goal.deleteMany();
   await prisma.enrollment.deleteMany();
@@ -38,9 +39,10 @@ async function main() {
   const now = Date.now();
 
   await prisma.user.create({ data: { name: "Alex Admin", email: "admin@example.com", role: "ADMIN", passwordHash } });
-  await prisma.user.create({
+  const kelly = await prisma.user.create({
     data: {
       name: "Kelly O'Neill",
+      meetingLink: "https://meet.google.com/abc-defg-hij",
       email: "kelly@example.com",
       role: "MENTOR",
       passwordHash,
@@ -114,6 +116,62 @@ async function main() {
       goals: "Fix the evening timetable, stop teaching 25 classes a week myself, and decide whether to open a second room.",
       linkedinUrl: "https://instagram.com/example",
     },
+  });
+
+  // Studio owner already working with Kelly.
+  const niamh = await prisma.user.create({ data: { name: "Niamh Walsh", email: "niamh@example.com", role: "MENTEE", passwordHash } });
+  const niamhApp = await prisma.application.create({
+    data: {
+      name: niamh.name,
+      email: niamh.email,
+      cohortId: studio.id,
+      currentRole: "Owner",
+      studioName: "Shore Pilates",
+      studioLocation: "Wexford",
+      studioStage: "Open less than 1 year",
+      background: "Opened in March with six reformers. Classes are about 60% full.",
+      goals: "Get to break-even, set up memberships, and hire my first instructor.",
+      status: "ACCEPTED",
+    },
+  });
+  const niamhEnrollment = await prisma.enrollment.create({
+    data: {
+      applicationId: niamhApp.id,
+      cohortId: studio.id,
+      menteeId: niamh.id,
+      mentorId: kelly.id,
+      status: "ACTIVE",
+      paymentToken: token(),
+      amountCents: studio.priceCents,
+      currency: studio.currency,
+      paidAt: new Date(now - 20 * day),
+    },
+  });
+  await prisma.goal.createMany({
+    data: [
+      { enrollmentId: niamhEnrollment.id, title: "Launch a monthly membership", status: "IN_PROGRESS" },
+      { enrollmentId: niamhEnrollment.id, title: "Hire a part-time instructor", status: "NOT_STARTED" },
+    ],
+  });
+  await prisma.meeting.createMany({
+    data: [
+      {
+        enrollmentId: niamhEnrollment.id,
+        scheduledAt: new Date(now - 7 * day),
+        status: "COMPLETED",
+        location: kelly.meetingLink,
+        agenda: "Studio deep-dive",
+        notes: "Went through the numbers. Evening classes are underpriced relative to demand. Action: draft two membership tiers.",
+        createdById: kelly.id,
+      },
+      {
+        enrollmentId: niamhEnrollment.id,
+        scheduledAt: new Date(now + 2 * day),
+        location: kelly.meetingLink,
+        agenda: "Review membership tiers and pricing",
+        createdById: kelly.id,
+      },
+    ],
   });
 
   // Active mentee with a mentor, goals and sessions.

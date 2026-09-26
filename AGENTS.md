@@ -20,3 +20,6 @@ mentor books sessions and writes notes; mentee and mentor share goals.
   `RESEND_API_KEY` they print to the dev-server console.
 - Meeting times are entered/shown in `site.timeZone` (`src/lib/site.ts`).
 - Without Stripe keys in development, `/pay/[token]` offers "Simulate payment".
+- Video calls: `src/lib/google.ts` (Calendar/Meet via REST, refresh tokens
+  AES-GCM encrypted with AUTH_SECRET). Mentor schedule `/mentor/schedule`,
+  settings `/mentor/settings`; mentee call centre `/dashboard/sessions`.

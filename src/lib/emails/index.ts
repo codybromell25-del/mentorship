@@ -122,3 +122,23 @@ export function meetingScheduledEmail(a: { name: string; otherName: string; when
     { label: "View session", url: a.url },
   );
 }
+
+export function meetingRescheduledEmail(a: { name: string; otherName: string; when: Date; location?: string | null; url: string }): Email {
+  return build(
+    `Session moved: ${formatDateTime(a.when)}`,
+    "Your session has moved",
+    [
+      `Hi ${a.name},`,
+      `Your session with ${a.otherName} is now on ${formatDateTime(a.when)} (${site.timeZone}).`,
+      ...(a.location ? [`Where: ${a.location}`] : []),
+    ],
+    { label: "View session", url: a.url },
+  );
+}
+
+export function meetingCancelledEmail(a: { name: string; otherName: string; when: Date }): Email {
+  return build(`Session cancelled: ${formatDateTime(a.when)}`, "Session cancelled", [
+    `Hi ${a.name},`,
+    `Your session with ${a.otherName} on ${formatDateTime(a.when)} has been cancelled. They'll be in touch to find a new time.`,
+  ]);
+}
