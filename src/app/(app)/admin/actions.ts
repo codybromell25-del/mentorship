@@ -11,8 +11,12 @@ import { acceptedEmail, accountSetupEmail, mentorAssignedEmail, rejectedEmail, w
 import type { ActionState } from "@/components/ActionForm";
 import { emailEnabled } from "@/lib/config";
 
-/** Until email is switched on, admins get the link to pass on themselves. */
-const shareNote = (url: string) => (emailEnabled() ? "" : ` Email isn't switched on yet, so send them this link yourself: ${url}`);
+/**
+ * Confirmation text for actions that email someone a link. Until email is
+ * switched on, the admin gets the link to pass on themselves instead.
+ */
+const linkSent = (done: string, emailed: string, url: string) =>
+  emailEnabled() ? `${done} — ${emailed}.` : `${done}. Email isn't switched on yet, so send them this link yourself: ${url}`;
 
 const requireAdmin = () => requireUser(["ADMIN"]);
 
@@ -57,7 +61,7 @@ export async function acceptApplication(applicationId: string): Promise<ActionSt
     }),
   });
   revalidatePath("/admin", "layout");
-  return { ok: `Accepted — payment link emailed to ${app.email}.${shareNote(payUrl)}` };
+  return { ok: linkSent("Accepted", `payment link emailed to ${app.email}`, payUrl) };
 }
 
 export async function decideApplication(applicationId: string, status: "WAITLISTED" | "REJECTED"): Promise<ActionState> {
@@ -96,7 +100,7 @@ export async function resendPaymentLink(enrollmentId: string): Promise<ActionSta
       payUrl,
     }),
   });
-  return { ok: `Payment link re-sent.${shareNote(payUrl)}` };
+  return { ok: linkSent("Done", "payment link re-sent", payUrl) };
 }
 
 // ─── Enrollments ────────────────────────────────────────────────────
@@ -208,7 +212,7 @@ export async function createMentor(_prev: ActionState, formData: FormData): Prom
   sendEmailAsync({ to: user.email, ...accountSetupEmail({ name: user.name, url: setupUrl, isMentor: true }) });
 
   revalidatePath("/admin/mentors");
-  return { ok: `${d.name} added — setup email sent.${shareNote(setupUrl)}` };
+  return { ok: linkSent(`${d.name} added`, "setup email sent", setupUrl) };
 }
 
 export async function updateMentorProfile(userId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
